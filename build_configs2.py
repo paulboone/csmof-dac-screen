@@ -1,25 +1,17 @@
 
-import itertools
-import os
+from pathlib import Path
 
-import ase
+
 import networkx as nx
+import numpy as np
 
-from lammps_tools.forcefields.uff.parameterize import *
+from lammps_tools.forcefields.uff.parameterize import get_pair_potential, get_bond_parameters, \
+    get_angle_parameters #, get_dihedral_parameters
 
 from mofun import Atoms
+from mofun.uff4mof import UFF4MOF
 from mofun.atoms import find_unchanged_atom_pairs
-
-linker = Atoms.from_cml(os.path.join("linkers-cml","uio66.cml"))
-fnlinker = Atoms.from_cml(os.path.join("linkers-cml","uio66-hydroxy.cml"))
-
-match_pairs = find_unchanged_atom_pairs(linker, fnlinker)
-unchanged_atom_indices = set(list(zip(*match_pairs))[1])
-
-fnlinker.calc_angles()
-fnlinker.calc_dihedrals()
-
-print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+from mofun.rough_uff import assign_uff_atom_types
 
 def delete_if_all_in_set(arr, s):
     deletion_list = []
@@ -28,44 +20,85 @@ def delete_if_all_in_set(arr, s):
             deletion_list.append(i)
     return np.delete(arr, deletion_list, axis=0)
 
-fnlinker.bonds = delete_if_all_in_set(fnlinker.bonds, unchanged_atom_indices)
-fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
-fnlinker.dihedrals = delete_if_all_in_set(fnlinker.dihedrals, unchanged_atom_indices)
+def atomoto2tup(param_dict):
+    return {tuple(key.split("-")): val for key, val in param_dict.items()}
 
-print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+def tup2atomoto(tup):
+    return "-".join(tup)
 
-bonds_with = [[] for _ in range(len(fnlinker))]
-for (i1, i2) in fnlinker.bonds:
-    bonds_with[i1].append(i2)
-    bonds_with[i2].append(i1)
+def atomoto2lammpscoeff(angle_params):
+    coeffs = []
+    for atom_types, params in angle_params.items():
+        if params[0] == "fourier":
+            coeffs.append('%s %10.6f %10.6f %10.6f %10.6f # %s' % (*params, " ".join(atom_types)))
+        elif params[0] == "cosine/periodic":
+            coeffs.append('%s %10.6f %d %d # %s' % (*params, " ".join(atom_types)))
+        else:
+            raise Exception("Unhandled angle style '%s'" % params[0])
+    return coeffs
 
+def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmpdat_path):
+    linker = Atoms.from_cml(linker_path)
+    fnlinker = Atoms.from_cml(fnlinker_path)
 
-# g = nx.Graph()
-# g.add_edges_from(fnlinker.bonds)
-# g
-# g.edges
-# g.adj[6]
-fnlinker.symbols
-fnlinker.to_ase()
+    # assign uff atom types using mofun.rough_uff
+    g = nx.Graph()
+    g.add_edges_from(fnlinker.bonds)
+    uff_types = assign_uff_atom_types(g, fnlinker.elements)
+    fnlinker.retype_atoms_from_uff_types(uff_types)
 
-ase_atoms = ase.Atoms(fnlinker.elements, positions=fnlinker.positions)
+    # calculate all possible many-body terms
+    fnlinker.calc_angles()
+    # fnlinker.calc_dihedrals()
 
-assign_forcefield_atom_types(ase_atoms, bonds_with)
+    # remove any dihedrals, angles and bonds that are unchanged from the original linker,
+    # as we are only going to relax the new functional group, leaving everything else fixed.
+    print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+    match_pairs = find_unchanged_atom_pairs(linker, fnlinker)
+    unchanged_atom_indices = set(list(zip(*match_pairs))[1])
+    fnlinker.bonds = delete_if_all_in_set(fnlinker.bonds, unchanged_atom_indices)
+    fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
+    fnlinker.dihedrals = delete_if_all_in_set(fnlinker.dihedrals, unchanged_atom_indices)
+    print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+
+    # calculate potential parameters using atomoto, and assign type #s to linker
+    pair_params = get_pair_potential(uff_types)
+    fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in fnlinker.atom_type_labels]
+
+    bond_types = [(uff_types[b1], uff_types[b2]) for b1, b2 in fnlinker.bonds]
+    bond_params = atomoto2tup(get_bond_parameters([tup2atomoto(b) for b in set(bond_types)]))
+    fnlinker.bond_types = [list(bond_params).index(bt) for bt in bond_types]
+    fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % (*params, " ".join(atom_types)) for (atom_types, params) in bond_params.items()]
+
+    angle_types = [tuple([uff_types[a] for a in atoms]) for atoms in fnlinker.angles]
+    angle_values = [UFF4MOF[uff_types[a]][1] for _, a, _ in fnlinker.angles]
+    angle_value_dict = {tup2atomoto(angle_type): [angle_values[i]] for i, angle_type in enumerate(angle_types)}
+    angle_params = atomoto2tup(get_angle_parameters([tup2atomoto(a) for a in set(angle_types)], angle_value_dict))
+    fnlinker.angle_type_params = atomoto2lammpscoeff(angle_params)
+    fnlinker.angle_types = [list(angle_params).index(a) for a in angle_types]
+
 #
 #
+# for i, label in enumerate(self.atom_type_labels):
+#           f.write(' %d %10.6f %10.6f # %s\n' % (i + 1, *pair_params[label], label))
 #
+# for i, (atom_types, params) in enumerate(bond_params.items()):
+#           f.write(' %d %10.6f %10.6f # %s\n' % (i + 1, *params, " ".join(atom_types)))
 #
-# get_pair_potential(["C_2", "O2", "H_", "F_"])
-# get_bond_parameters(["C_2-H_"])
-# get_bond_parameters(["C_R-H_"])
-# get_angle_parameters(["C_2-C_2-F_"], {"C_2-C_2-F_":[120]})
+# for i, (atom_types, params) in enumerate(angle_params.items()):
 #
-#
-# # ase.Atoms.
-# #
-#
-# #
-# # aatoms = ase.Atoms(atoms.map_atom_types(lammps_atom_type_map), positions=atoms.positions)
-# # aatoms.translate((5,5,5))
-# # aatoms.positions %= 50
-# # aatoms.write("uio66-linker-2.cif")
+#               raise Exception("Unhandled angle style '%s'" % params[0])
+
+    # TODO: need dihedral parameters from atomoto to do dihedrals
+
+    # assign atoms to molecules where 1 is original linker, 2 is for new functional group atoms
+    atom_molecules = [1 if i in unchanged_atom_indices else 2 for i in range(len(fnlinker))]
+
+    # output lammps-data file
+    with open(lmpdat_path, "w") as f:
+        fnlinker.to_lammps_data(f, atom_molecules=atom_molecules)
+
+linker_path = Path("linkers-cml/uio66.cml")
+lmp_base_path = Path("linkers-lmpdat")
+for fnlinker_path in Path("linkers-cml").glob("uio66-*"):
+    cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"))
