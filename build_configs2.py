@@ -77,18 +77,6 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     fnlinker.angle_type_params = atomoto2lammpscoeff(angle_params)
     fnlinker.angle_types = [list(angle_params).index(a) for a in angle_types]
 
-#
-#
-# for i, label in enumerate(self.atom_type_labels):
-#           f.write(' %d %10.6f %10.6f # %s\n' % (i + 1, *pair_params[label], label))
-#
-# for i, (atom_types, params) in enumerate(bond_params.items()):
-#           f.write(' %d %10.6f %10.6f # %s\n' % (i + 1, *params, " ".join(atom_types)))
-#
-# for i, (atom_types, params) in enumerate(angle_params.items()):
-#
-#               raise Exception("Unhandled angle style '%s'" % params[0])
-
     # TODO: need dihedral parameters from atomoto to do dihedrals
 
     # assign atoms to molecules where 1 is original linker, 2 is for new functional group atoms
@@ -98,7 +86,17 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     with open(lmpdat_path, "w") as f:
         fnlinker.to_lammps_data(f, atom_molecules=atom_molecules)
 
+
+# convert UIO-66 linkers
 linker_path = Path("linkers-cml/uio66.cml")
 lmp_base_path = Path("linkers-lmpdat")
 for fnlinker_path in Path("linkers-cml").glob("uio66-*"):
+    print("reading %s" %fnlinker_path)
+    cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"))
+
+# convert UIO-67 linkers
+linker_path = Path("linkers-cml/uio67.cml")
+lmp_base_path = Path("linkers-lmpdat")
+for fnlinker_path in Path("linkers-cml").glob("uio67-*"):
+    print("reading %s" %fnlinker_path)
     cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"))
