@@ -1,38 +1,38 @@
 <molecule formalCharge="-2">
  <atomArray>
-  <atom id="a1" elementType="C" x3="0.000181" y3="0.036268" z3="0.000001"/>
-  <atom id="a2" elementType="O" x3="0.349164" y3="0.032778" z3="-1.206999"/>
-  <atom id="a3" elementType="O" formalCharge="-1" x3="-1.206758" y3="0.048338" z3="0.349001"/>
-  <atom id="a4" elementType="C" x3="1.064128" y3="0.025629" z3="1.064000"/>
-  <atom id="a5" elementType="C" x3="0.637150" y3="0.029898" z3="2.358001"/>
-  <atom id="a6" elementType="H" x3="-0.478794" y3="0.041058" z3="2.590001"/>
-  <atom id="a7" elementType="H" x3="1.361313" y3="0.021464" z3="4.402429"/>
-  <atom id="a8" elementType="C" x3="1.633100" y3="0.019939" z3="3.353000"/>
-  <atom id="a9" elementType="C" x3="2.927036" y3="0.006999" z3="2.927000"/>
-  <atom id="a10" elementType="C" x3="3.353014" y3="0.002739" z3="1.633000"/>
-  <atom id="a11" elementType="C" x3="2.358064" y3="0.012689" z3="0.637000"/>
-  <atom id="a12" elementType="N" x3="2.805378" y3="0.158403" z3="-0.714865"/>
-  <atom id="a13" elementType="H" x3="4.468958" y3="-0.008421" z3="1.401000"/>
-  <atom id="a14" elementType="O" x3="5.197922" y3="-0.015711" z3="3.642000"/>
-  <atom id="a15" elementType="C" x3="3.990983" y3="-0.003641" z3="3.991000"/>
-  <atom id="a16" elementType="O" formalCharge="-1" x3="3.642000" y3="-0.000151" z3="5.198000"/>
-  <atom id="a17" elementType="C" x3="3.019291" y3="1.584793" z3="-1.011610"/>
-  <atom id="a18" elementType="C" x3="3.434013" y3="1.813042" z3="-2.491403"/>
-  <atom id="a19" elementType="C" x3="3.507157" y3="3.332545" z3="-2.740282"/>
-  <atom id="a20" elementType="C" x3="4.817741" y3="1.200380" z3="-2.762109"/>
-  <atom id="a21" elementType="H" x3="2.101946" y3="2.154345" z3="-0.807100"/>
-  <atom id="a22" elementType="H" x3="5.574167" y3="1.622069" z3="-2.090982"/>
-  <atom id="a23" elementType="H" x3="5.140768" y3="1.397074" z3="-3.790896"/>
-  <atom id="a24" elementType="C" x3="2.414628" y3="1.217452" z3="-3.479034"/>
-  <atom id="a25" elementType="H" x3="1.959754" y3="-0.120446" z3="-1.259942"/>
-  <atom id="a26" elementType="H" x3="1.406917" y3="1.601649" z3="-3.286879"/>
-  <atom id="a27" elementType="H" x3="2.380108" y3="0.124397" z3="-3.419708"/>
-  <atom id="a28" elementType="H" x3="2.672566" y3="1.472959" z3="-4.513401"/>
-  <atom id="a29" elementType="H" x3="4.226798" y3="3.811494" z3="-2.067452"/>
-  <atom id="a30" elementType="H" x3="2.531598" y3="3.805668" z3="-2.577980"/>
-  <atom id="a31" elementType="H" x3="3.813853" y3="3.552907" z3="-3.769121"/>
-  <atom id="a32" elementType="H" x3="3.802873" y3="1.989607" z3="-0.357243"/>
-  <atom id="a33" elementType="H" x3="4.811308" y3="0.114359" z3="-2.620843"/>
+  <atom id="a1" elementType="C" x3="0.000000" y3="0.000000" z3="0.000000"/>
+  <atom id="a2" elementType="O" x3="0.349000" y3="0.000000" z3="-1.207000"/>
+  <atom id="a3" elementType="O" formalCharge="-1" x3="-1.207000" y3="0.000000" z3="0.349000"/>
+  <atom id="a4" elementType="C" x3="1.064000" y3="0.000000" z3="1.064000"/>
+  <atom id="a5" elementType="C" x3="0.637000" y3="0.000000" z3="2.358000"/>
+  <atom id="a6" elementType="N" x3="-0.698103" y3="-0.185423" z3="2.799213"/>
+  <atom id="a7" elementType="H" x3="1.401000" y3="0.000000" z3="4.469000"/>
+  <atom id="a8" elementType="C" x3="1.633000" y3="0.000000" z3="3.353000"/>
+  <atom id="a9" elementType="C" x3="2.927000" y3="0.000000" z3="2.927000"/>
+  <atom id="a10" elementType="C" x3="3.353000" y3="0.000000" z3="1.633000"/>
+  <atom id="a11" elementType="C" x3="2.358000" y3="0.000000" z3="0.637000"/>
+  <atom id="a12" elementType="H" x3="2.612816" y3="-0.005660" z3="-0.416027"/>
+  <atom id="a13" elementType="H" x3="4.402890" y3="-0.000066" z3="1.361926"/>
+  <atom id="a14" elementType="O" x3="5.198000" y3="0.000000" z3="3.642000"/>
+  <atom id="a15" elementType="C" x3="3.991000" y3="0.000000" z3="3.991000"/>
+  <atom id="a16" elementType="O" formalCharge="-1" x3="3.642000" y3="0.000000" z3="5.198000"/>
+  <atom id="a17" elementType="H" x3="-1.265613" y3="0.029273" z3="1.949633"/>
+  <atom id="a18" elementType="C" x3="-0.938765" y3="-1.588885" z3="3.155645"/>
+  <atom id="a19" elementType="H" x3="-0.249748" y3="-1.899340" z3="3.952486"/>
+  <atom id="a20" elementType="H" x3="-0.744561" y3="-2.235025" z3="2.288315"/>
+  <atom id="a21" elementType="C" x3="-2.392669" y3="-1.814692" z3="3.648457"/>
+  <atom id="a22" elementType="C" x3="-2.686364" y3="-0.959935" z3="4.893171"/>
+  <atom id="a23" elementType="C" x3="-2.546739" y3="-3.301223" z3="4.024863"/>
+  <atom id="a24" elementType="C" x3="-3.417094" y3="-1.484822" z3="2.549216"/>
+  <atom id="a25" elementType="H" x3="-1.966231" y3="-1.166549" z3="5.692751"/>
+  <atom id="a26" elementType="H" x3="-3.688232" y3="-1.167762" z3="5.286078"/>
+  <atom id="a27" elementType="H" x3="-2.639371" y3="0.110995" z3="4.668113"/>
+  <atom id="a28" elementType="H" x3="-1.845420" y3="-3.584116" z3="4.817948"/>
+  <atom id="a29" elementType="H" x3="-2.354670" y3="-3.949229" z3="3.162149"/>
+  <atom id="a30" elementType="H" x3="-3.559120" y3="-3.517703" z3="4.384380"/>
+  <atom id="a31" elementType="H" x3="-3.422838" y3="-0.417227" z3="2.305941"/>
+  <atom id="a32" elementType="H" x3="-4.432885" y3="-1.748239" z3="2.865885"/>
+  <atom id="a33" elementType="H" x3="-3.201862" y3="-2.040231" z3="1.629590"/>
  </atomArray>
  <bondArray>
   <bond atomRefs2="a1 a2" order="2"/>
@@ -51,22 +51,22 @@
   <bond atomRefs2="a7 a8" order="1"/>
   <bond atomRefs2="a14 a15" order="2"/>
   <bond atomRefs2="a15 a16" order="1"/>
-  <bond atomRefs2="a12 a17" order="1"/>
-  <bond atomRefs2="a18 a17" order="1"/>
+  <bond atomRefs2="a6 a17" order="1"/>
+  <bond atomRefs2="a6 a18" order="1"/>
   <bond atomRefs2="a18 a19" order="1"/>
   <bond atomRefs2="a18 a20" order="1"/>
-  <bond atomRefs2="a17 a21" order="1"/>
-  <bond atomRefs2="a20 a22" order="1"/>
-  <bond atomRefs2="a20 a23" order="1"/>
-  <bond atomRefs2="a18 a24" order="1"/>
-  <bond atomRefs2="a12 a25" order="1"/>
-  <bond atomRefs2="a24 a26" order="1"/>
-  <bond atomRefs2="a24 a27" order="1"/>
-  <bond atomRefs2="a24 a28" order="1"/>
-  <bond atomRefs2="a19 a29" order="1"/>
-  <bond atomRefs2="a19 a30" order="1"/>
-  <bond atomRefs2="a19 a31" order="1"/>
-  <bond atomRefs2="a17 a32" order="1"/>
-  <bond atomRefs2="a20 a33" order="1"/>
+  <bond atomRefs2="a18 a21" order="1"/>
+  <bond atomRefs2="a21 a22" order="1"/>
+  <bond atomRefs2="a21 a23" order="1"/>
+  <bond atomRefs2="a21 a24" order="1"/>
+  <bond atomRefs2="a22 a25" order="1"/>
+  <bond atomRefs2="a22 a26" order="1"/>
+  <bond atomRefs2="a22 a27" order="1"/>
+  <bond atomRefs2="a23 a28" order="1"/>
+  <bond atomRefs2="a23 a29" order="1"/>
+  <bond atomRefs2="a23 a30" order="1"/>
+  <bond atomRefs2="a24 a31" order="1"/>
+  <bond atomRefs2="a24 a32" order="1"/>
+  <bond atomRefs2="a24 a33" order="1"/>
  </bondArray>
 </molecule>

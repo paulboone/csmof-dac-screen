@@ -6,7 +6,7 @@
   <atom id="a4" elementType="C" x3="1.064000" y3="0.000000" z3="1.064000"/>
   <atom id="a5" elementType="C" x3="0.637000" y3="0.000000" z3="2.358000"/>
   <atom id="a6" elementType="H" x3="-0.479000" y3="0.000000" z3="2.590000"/>
-  <atom id="a7" elementType="O" x3="1.111076" y3="-0.000193" z3="4.610351"/>
+  <atom id="a7" elementType="O" x3="1.181231" y3="-0.000005" z3="4.635626"/>
   <atom id="a8" elementType="C" x3="1.633000" y3="0.000000" z3="3.353000"/>
   <atom id="a9" elementType="C" x3="2.927000" y3="0.000000" z3="2.927000"/>
   <atom id="a10" elementType="C" x3="3.353000" y3="0.000000" z3="1.633000"/>
@@ -16,7 +16,7 @@
   <atom id="a14" elementType="O" x3="5.198000" y3="0.000000" z3="3.642000"/>
   <atom id="a15" elementType="C" x3="3.991000" y3="0.000000" z3="3.991000"/>
   <atom id="a16" elementType="O" formalCharge="-1" x3="3.642000" y3="0.000000" z3="5.198000"/>
-  <atom id="a17" elementType="H" x3="0.182000" y3="-0.000160" z3="4.731953"/>
+  <atom id="a17" elementType="H" x3="0.216437" y3="-0.000121" z3="4.621208"/>
  </atomArray>
  <bondArray>
   <bond atomRefs2="a1 a2" order="2"/>
