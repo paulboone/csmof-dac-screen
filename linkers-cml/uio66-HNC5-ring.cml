@@ -11,8 +11,8 @@
   <atom id="a9" elementType="C" x3="2.927000" y3="0.000000" z3="2.927000"/>
   <atom id="a10" elementType="C" x3="3.353000" y3="0.000000" z3="1.633000"/>
   <atom id="a11" elementType="C" x3="2.358000" y3="0.000000" z3="0.637000"/>
-  <atom id="a12" elementType="H" x3="2.612816" y3="-0.005660" z3="-0.416027"/>
-  <atom id="a13" elementType="H" x3="4.402890" y3="-0.000066" z3="1.361926"/>
+  <atom id="a12" elementType="H" x3="2.590000" y3="0.000000" z3="-0.479000"/>
+  <atom id="a13" elementType="H" x3="4.469000" y3="0.000000" z3="1.401000"/>
   <atom id="a14" elementType="O" x3="5.198000" y3="0.000000" z3="3.642000"/>
   <atom id="a15" elementType="C" x3="3.991000" y3="0.000000" z3="3.991000"/>
   <atom id="a16" elementType="O" formalCharge="-1" x3="3.642000" y3="0.000000" z3="5.198000"/>
