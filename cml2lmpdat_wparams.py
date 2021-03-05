@@ -77,12 +77,12 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     pair_params = get_pair_potential(uff_types)
     fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in fnlinker.atom_type_labels]
 
-    bond_types = [(uff_types[b1], uff_types[b2]) for b1, b2 in fnlinker.bonds]
+    bond_types = [tuple(sorted([uff_types[b1], uff_types[b2]])) for b1, b2 in fnlinker.bonds]
     bond_params = atomoto2tup(get_bond_parameters([tup2atomoto(b) for b in set(bond_types)]))
     fnlinker.bond_types = [list(bond_params).index(bt) for bt in bond_types]
     fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % (*params, " ".join(atom_types)) for (atom_types, params) in bond_params.items()]
 
-    angle_types = [tuple([uff_types[a] for a in atoms]) for atoms in fnlinker.angles]
+    angle_types = [tuple(sorted([uff_types[a] for a in atoms])) for atoms in fnlinker.angles]
     angle_values = [UFF4MOF[uff_types[a]][1] for _, a, _ in fnlinker.angles]
     angle_value_dict = {tup2atomoto(angle_type): [angle_values[i]] for i, angle_type in enumerate(angle_types)}
     angle_params = atomoto2tup(get_angle_parameters([tup2atomoto(a) for a in set(angle_types)], angle_value_dict))
