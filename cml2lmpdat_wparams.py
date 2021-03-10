@@ -1,4 +1,4 @@
-
+from collections import Counter
 from pathlib import Path
 
 import networkx as nx
@@ -36,8 +36,6 @@ def order_types(tup):
     if tuple(rev) <= tuple(tup):
         return tuple(rev)
     return tuple(tup)
-
-
 
 def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmpdat_path):
 
@@ -90,10 +88,13 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     angle_params = [(*ruff.angle_params(*a_ids), "%s %s %s" % a_ids) for a_ids in unique_angle_types]
     fnlinker.angle_type_params = [angle2lammpsdat(a) for a in angle_params]
 
-    dihedral_types = [order_types([uff_types[a] for a in atoms]) for atoms in fnlinker.dihedrals]
+    num_dihedrals_per_bond = Counter([order_types([a2, a3]) for _, a2, a3, _ in fnlinker.dihedrals])
+    dihedral_types = [(*order_types([uff_types[a] for a in atoms]),
+                            num_dihedrals_per_bond[order_types([atoms[1], atoms[2]])])
+                        for atoms in fnlinker.dihedrals]
     unique_dihedral_types = list(dict.fromkeys(dihedral_types).keys())
     fnlinker.dihedral_types = [unique_dihedral_types.index(a) for a in dihedral_types]
-    dihedral_params = [(*ruff.dihedral_params(*a_ids), "%s %s %s %s" % a_ids) for a_ids in unique_dihedral_types]
+    dihedral_params = [(*ruff.dihedral_params(*a_ids), "%s %s %s %s M=%d" % a_ids) for a_ids in unique_dihedral_types]
     fnlinker.dihedral_type_params = ['%s %10.6f %d %d # %s' % params for params in dihedral_params]
 
     # assign atoms to molecules where 0 is original linker, 1 is for new functional group atoms
