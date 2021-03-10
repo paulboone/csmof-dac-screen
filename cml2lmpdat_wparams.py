@@ -11,7 +11,7 @@ from lammps_tools.forcefields.uff.parameterize import get_pair_potential, get_bo
 from mofun import Atoms
 from mofun.uff4mof import UFF4MOF
 from mofun.atoms import find_unchanged_atom_pairs
-from mofun.rough_uff import assign_uff_atom_types, default_uff_rules
+import mofun.rough_uff as ruff
 
 def delete_if_all_in_set(arr, s):
     deletion_list = []
@@ -26,16 +26,22 @@ def atomoto2tup(param_dict):
 def tup2atomoto(tup):
     return "-".join(tup)
 
-def atomoto2lammpscoeff(angle_params):
-    coeffs = []
-    for atom_types, params in angle_params.items():
-        if params[0] == "fourier":
-            coeffs.append('%s %10.6f %10.6f %10.6f %10.6f # %s' % (*params, " ".join(atom_types)))
-        elif params[0] == "cosine/periodic":
-            coeffs.append('%s %10.6f %d %d # %s' % (*params, " ".join(atom_types)))
-        else:
-            raise Exception("Unhandled angle style '%s'" % params[0])
-    return coeffs
+def angle2lammpsdat(params):
+    if params[0] == "fourier":
+        return '%s %10.6f %10.6f %10.6f %10.6f # %s' % params
+    elif params[0] == "cosine/periodic":
+        return '%s %10.6f %d %d # %s' % params
+    else:
+        raise Exception("Unhandled angle style '%s'" % params[0])
+
+def order_types(tup):
+    rev = list(tup)
+    rev.reverse()
+    if tuple(rev) <= tuple(tup):
+        return tuple(rev)
+    return tuple(tup)
+
+
 
 def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmpdat_path):
 
@@ -55,12 +61,12 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     # assign uff atom types using mofun.rough_uff
     g = nx.Graph()
     g.add_edges_from(fnlinker.bonds)
-    uff_types = assign_uff_atom_types(g, fnlinker.elements, override_rules=uff_rules)
+    uff_types = ruff.assign_uff_atom_types(g, fnlinker.elements, override_rules=uff_rules)
     fnlinker.retype_atoms_from_uff_types(uff_types)
 
     # calculate all possible many-body terms
     fnlinker.calc_angles()
-    # fnlinker.calc_dihedrals()
+    fnlinker.calc_dihedrals()
 
     # remove any dihedrals, angles and bonds that are unchanged from the original linker,
     # as we are only going to relax the new functional group, leaving everything else fixed.
@@ -77,19 +83,23 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     pair_params = get_pair_potential(uff_types)
     fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in fnlinker.atom_type_labels]
 
-    bond_types = [tuple(sorted([uff_types[b1], uff_types[b2]])) for b1, b2 in fnlinker.bonds]
-    bond_params = atomoto2tup(get_bond_parameters([tup2atomoto(b) for b in set(bond_types)]))
-    fnlinker.bond_types = [list(bond_params).index(bt) for bt in bond_types]
-    fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % (*params, " ".join(atom_types)) for (atom_types, params) in bond_params.items()]
+    bond_types = [order_types([uff_types[b1], uff_types[b2]]) for b1, b2 in fnlinker.bonds]
+    unique_bond_types = list(dict.fromkeys(bond_types).keys())
+    fnlinker.bond_types = [unique_bond_types.index(bt) for bt in bond_types]
+    bond_params = [(*ruff.bond_params(a1, a2), "%s %s" % (a1, a2)) for (a1, a2) in unique_bond_types]
+    fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % params for params in bond_params]
 
-    angle_types = [tuple(sorted([uff_types[a] for a in atoms])) for atoms in fnlinker.angles]
-    angle_values = [UFF4MOF[uff_types[a]][1] for _, a, _ in fnlinker.angles]
-    angle_value_dict = {tup2atomoto(angle_type): [angle_values[i]] for i, angle_type in enumerate(angle_types)}
-    angle_params = atomoto2tup(get_angle_parameters([tup2atomoto(a) for a in set(angle_types)], angle_value_dict))
-    fnlinker.angle_type_params = atomoto2lammpscoeff(angle_params)
-    fnlinker.angle_types = [list(angle_params).index(a) for a in angle_types]
+    angle_types = [order_types([uff_types[a] for a in atoms]) for atoms in fnlinker.angles]
+    unique_angle_types = list(dict.fromkeys(angle_types).keys())
+    fnlinker.angle_types = [unique_angle_types.index(a) for a in angle_types]
+    angle_params = [(*ruff.angle_params(*a_ids), "%s %s %s" % a_ids) for a_ids in unique_angle_types]
+    fnlinker.angle_type_params = [angle2lammpsdat(a) for a in angle_params]
 
-    # TODO: need dihedral parameters from atomoto to do dihedrals
+    dihedral_types = [order_types([uff_types[a] for a in atoms]) for atoms in fnlinker.dihedrals]
+    unique_dihedral_types = list(dict.fromkeys(dihedral_types).keys())
+    fnlinker.dihedral_types = [unique_dihedral_types.index(a) for a in dihedral_types]
+    dihedral_params = [(*ruff.dihedral_params(*a_ids), "%s %s %s %s" % a_ids) for a_ids in unique_dihedral_types]
+    fnlinker.dihedral_type_params = ['%s %10.6f %d %d # %s' % params for params in dihedral_params]
 
     # assign atoms to molecules where 0 is original linker, 1 is for new functional group atoms
     fnlinker.atom_groups = [0 if i in unchanged_atom_indices else 1 for i in range(len(fnlinker))]
