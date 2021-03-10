@@ -1,12 +1,8 @@
 
 from pathlib import Path
 
-
 import networkx as nx
 import numpy as np
-
-from lammps_tools.forcefields.uff.parameterize import get_pair_potential, get_bond_parameters, \
-    get_angle_parameters #, get_dihedral_parameters
 
 from mofun import Atoms
 from mofun.uff4mof import UFF4MOF
@@ -80,8 +76,7 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
 
     # calculate potential parameters using atomoto, and assign type #s to linker
-    pair_params = get_pair_potential(uff_types)
-    fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in fnlinker.atom_type_labels]
+    fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*ruff.pair_params(a1), a1) for a1 in fnlinker.atom_type_labels]
 
     bond_types = [order_types([uff_types[b1], uff_types[b2]]) for b1, b2 in fnlinker.bonds]
     unique_bond_types = list(dict.fromkeys(bond_types).keys())
