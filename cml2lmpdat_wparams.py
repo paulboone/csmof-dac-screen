@@ -66,22 +66,24 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     # as we are only going to relax the new functional group, leaving everything else fixed.
     print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
     match_pairs = find_unchanged_atom_pairs(linker, fnlinker)
+    unchanged_atom_indices = []
     if len(match_pairs) > 0:
         unchanged_atom_indices = set(list(zip(*match_pairs))[1])
-        fnlinker.bonds = delete_if_all_in_set(fnlinker.bonds, unchanged_atom_indices)
-        fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
-        fnlinker.dihedrals = delete_if_all_in_set(fnlinker.dihedrals, unchanged_atom_indices)
-    print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+
+    # assign atoms to molecules where 0 is original linker, 1 is for new functional group atoms
+    fnlinker.atom_groups = [0 if i in unchanged_atom_indices else 1 for i in range(len(fnlinker))]
 
     # calculate potential parameters using atomoto, and assign type #s to linker
     fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*ruff.pair_params(a1), a1) for a1 in fnlinker.atom_type_labels]
 
+    fnlinker.bonds = delete_if_all_in_set(fnlinker.bonds, unchanged_atom_indices)
     bond_types = [order_types([uff_types[b1], uff_types[b2]]) for b1, b2 in fnlinker.bonds]
     unique_bond_types = list(dict.fromkeys(bond_types).keys())
     fnlinker.bond_types = [unique_bond_types.index(bt) for bt in bond_types]
     bond_params = [(*ruff.bond_params(a1, a2), "%s %s" % (a1, a2)) for (a1, a2) in unique_bond_types]
     fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % params for params in bond_params]
 
+    fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
     angle_types = [order_types([uff_types[a] for a in atoms]) for atoms in fnlinker.angles]
     unique_angle_types = list(dict.fromkeys(angle_types).keys())
     fnlinker.angle_types = [unique_angle_types.index(a) for a in angle_types]
@@ -89,6 +91,7 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     fnlinker.angle_type_params = [angle2lammpsdat(a) for a in angle_params]
 
     num_dihedrals_per_bond = Counter([order_types([a2, a3]) for _, a2, a3, _ in fnlinker.dihedrals])
+    fnlinker.dihedrals = delete_if_all_in_set(fnlinker.dihedrals, unchanged_atom_indices)
     dihedral_types = [(*order_types([uff_types[a] for a in atoms]),
                             num_dihedrals_per_bond[order_types([atoms[1], atoms[2]])])
                         for atoms in fnlinker.dihedrals]
@@ -97,8 +100,8 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     dihedral_params = [(*ruff.dihedral_params(*a_ids), "%s %s %s %s M=%d" % a_ids) for a_ids in unique_dihedral_types]
     fnlinker.dihedral_type_params = ['%s %10.6f %d %d # %s' % params for params in dihedral_params]
 
-    # assign atoms to molecules where 0 is original linker, 1 is for new functional group atoms
-    fnlinker.atom_groups = [0 if i in unchanged_atom_indices else 1 for i in range(len(fnlinker))]
+    print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+
 
     # output lammps-data file
     with open(lmpdat_path, "w") as f:
