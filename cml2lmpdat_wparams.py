@@ -41,13 +41,17 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
 
     uff_rules = {
         "H": [
-            ("H_b", dict(h=2)),
+            ("H_b", dict(n=2)),
             ("H_", {})
         ],
-        "N": [("N_1", dict(h=0))],
-        "O": [("O_1", dict(h=0))],
+        "N": [
+            ("N_R", dict(n=3, aromatic=True)),
+            ("N_1", dict(neighbors=("N","N")))
+        ],
+        "O": [("O_1", dict(n=1))],
         "C": [("C_R", dict(aromatic=True))]
     }
+    bond_order_rules = [({'N_1'}, 2), ({'N_1', 'N_2'}, 2)]
 
     linker = Atoms.from_cml(linker_path)
     fnlinker = Atoms.from_cml(fnlinker_path)
@@ -80,14 +84,14 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     bond_types = [order_types([uff_types[b1], uff_types[b2]]) for b1, b2 in fnlinker.bonds]
     unique_bond_types = list(dict.fromkeys(bond_types).keys())
     fnlinker.bond_types = [unique_bond_types.index(bt) for bt in bond_types]
-    bond_params = [(*ruff.bond_params(a1, a2), "%s %s" % (a1, a2)) for (a1, a2) in unique_bond_types]
+    bond_params = [(*ruff.bond_params(a1, a2, bond_order_rules=bond_order_rules), "%s %s" % (a1, a2)) for (a1, a2) in unique_bond_types]
     fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % params for params in bond_params]
 
     fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
     angle_types = [order_types([uff_types[a] for a in atoms]) for atoms in fnlinker.angles]
     unique_angle_types = list(dict.fromkeys(angle_types).keys())
     fnlinker.angle_types = [unique_angle_types.index(a) for a in angle_types]
-    angle_params = [(*ruff.angle_params(*a_ids), "%s %s %s" % a_ids) for a_ids in unique_angle_types]
+    angle_params = [(*ruff.angle_params(*a_ids, bond_order_rules=bond_order_rules), "%s %s %s" % a_ids) for a_ids in unique_angle_types]
     fnlinker.angle_type_params = [angle2lammpsdat(a) for a in angle_params]
 
     num_dihedrals_per_bond = Counter([order_types([a2, a3]) for _, a2, a3, _ in fnlinker.dihedrals])
@@ -96,8 +100,24 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
                             num_dihedrals_per_bond[order_types([atoms[1], atoms[2]])])
                         for atoms in fnlinker.dihedrals]
     unique_dihedral_types = list(dict.fromkeys(dihedral_types).keys())
+    dihedral_params = [ruff.dihedral_params(*a_ids, bond_order_rules=bond_order_rules) for a_ids in unique_dihedral_types]
+
+    # delete any dihedrals when the params come back None (i.e. for *_1)
+    for i in reversed(range(len(dihedral_params))):
+        if dihedral_params[i] is None:
+            none_dihedral = unique_dihedral_types[i]
+            print(len(fnlinker.dihedrals), len(dihedral_types), len(unique_dihedral_types), len(dihedral_params))
+
+            fnlinker.dihedrals = [d for j, d in enumerate(fnlinker.dihedrals) if dihedral_types[j] != none_dihedral]
+            dihedral_types = [d for d in dihedral_types if d != none_dihedral]
+
+            del(unique_dihedral_types[i])
+            del(dihedral_params[i])
+            print(len(fnlinker.dihedrals), len(dihedral_types), len(unique_dihedral_types), len(dihedral_params))
+
+    # assign dihedral types
     fnlinker.dihedral_types = [unique_dihedral_types.index(a) for a in dihedral_types]
-    dihedral_params = [(*ruff.dihedral_params(*a_ids), "%s %s %s %s M=%d" % a_ids) for a_ids in unique_dihedral_types]
+    dihedral_params = [(*ruff.dihedral_params(*a_ids, bond_order_rules=bond_order_rules), "%s %s %s %s M=%d" % a_ids) for a_ids in unique_dihedral_types]
     fnlinker.dihedral_type_params = ['%s %10.6f %d %d # %s' % params for params in dihedral_params]
 
     print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
