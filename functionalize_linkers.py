@@ -10,8 +10,7 @@ from mofun.uff4mof import uff_key_starts_with
 def functionalize_structure_with_linkers(structure, linker, fnlinkerglob):
     for fnlinker_path in fnlinkerglob:
         print("reading %s" %fnlinker_path)
-        fnlinker = Atoms.from_lammps_data(open(fnlinker_path,"r"))
-        fnlinker.atom_type_labels = [str(i) for i in range(fnlinker.num_atom_types)]
+        fnlinker = Atoms.from_lammps_data(open(fnlinker_path,"r"), use_comment_for_type_labels=True)
         try:
             new_structure = replace_pattern_in_structure(structure, linker, fnlinker)
             with open(lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"), "w") as fd:
