@@ -13,7 +13,7 @@ def functionalize_structure_with_linkers(structure, linker, fnlinkerglob):
         fnlinker = Atoms.from_lammps_data(open(fnlinker_path,"r"), use_comment_for_type_labels=True)
         try:
             new_structure = replace_pattern_in_structure(structure, linker, fnlinker)
-            with open(lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"), "w") as fd:
+            with open(lmp_base_path.joinpath(fnlinker_path.stem + ".lmpdat"), "w") as fd:
                 new_structure.to_lammps_data(fd)
         except Exception as e:
             print("ERROR! ", e.args)
@@ -26,13 +26,14 @@ def assign_pair_params_to_structure(structure):
     structure.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in pair_uff_keys]
 
 lmp_base_path = Path("mofs-functionalized")
+lmp_base_path.mkdir(exist_ok=True)
 
 linker = Atoms.from_cml(Path("linkers-cml/uio66.cml"))
-structure = Atoms.from_cif("mofs/uio-66.cif")
+structure = Atoms.from_cif("mofs/uio66-P1.cif")
 assign_pair_params_to_structure(structure)
 functionalize_structure_with_linkers(structure, linker, Path("linkers-lmpdat").glob("uio66-*"))
 
 linker = Atoms.from_cml(Path("linkers-cml/uio67.cml"))
-structure = Atoms.from_cif("mofs/uio-67.cif")
+structure = Atoms.from_cif("mofs/uio67-P1.cif")
 assign_pair_params_to_structure(structure)
 functionalize_structure_with_linkers(structure, linker, Path("linkers-lmpdat").glob("uio67-*"))
