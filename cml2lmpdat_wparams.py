@@ -127,14 +127,13 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     with open(lmpdat_path, "w") as f:
         fnlinker.to_lammps_data(f)
 
-
 # convert UIO-66 linkers
 linker_path = Path("linkers-cml/uio66.cml")
 lmp_base_path = Path("linkers-lmpdat")
 for fnlinker_path in Path("linkers-cml").glob("uio66-*"):
-    print("reading %s" %fnlinker_path)
+    print("\nreading %s" %fnlinker_path)
     try:
-        cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"))
+        cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmpdat"))
     except Exception as e:
         print("ERROR! ", e.args)
 
@@ -142,8 +141,8 @@ for fnlinker_path in Path("linkers-cml").glob("uio66-*"):
 linker_path = Path("linkers-cml/uio67.cml")
 lmp_base_path = Path("linkers-lmpdat")
 for fnlinker_path in Path("linkers-cml").glob("uio67-*"):
-    print("reading %s" %fnlinker_path)
+    print("\nreading %s" %fnlinker_path)
     try:
-        cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmp-dat"))
+        cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmpdat"))
     except Exception as e:
         print("ERROR! ", e.args)
