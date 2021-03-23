@@ -1,19 +1,29 @@
 from collections import Counter
 from pathlib import Path
 
+import click
 from lammps_tools.forcefields.uff.parameterize import get_pair_potential
 import numpy as np
 
 from mofun import Atoms, replace_pattern_in_structure
 from mofun.uff4mof import uff_key_starts_with
 
-def functionalize_structure_with_linkers(structure, linker, fnlinkerglob):
-    for fnlinker_path in fnlinkerglob:
+@click.command()
+@click.argument('structure_path',  type=click.Path())
+@click.argument('linker_path', type=click.Path())
+@click.argument('fnlinkers', nargs=-1, type=click.Path())
+@click.option('--output-dir', type=click.Path())
+def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers, output_dir=Path()):
+    linker = Atoms.from_cml(Path(linker_path))
+    structure = Atoms.from_cif(structure_path)
+    output_dir = Path(output_dir)
+    assign_pair_params_to_structure(structure)
+    for fnlinker_path in fnlinkers:
         print("reading %s" %fnlinker_path)
         fnlinker = Atoms.from_lammps_data(open(fnlinker_path,"r"), use_comment_for_type_labels=True)
         try:
             new_structure = replace_pattern_in_structure(structure, linker, fnlinker)
-            with open(lmp_base_path.joinpath(fnlinker_path.stem + ".lmpdat"), "w") as fd:
+            with open(output_dir.joinpath(Path(fnlinker_path).stem + ".lmpdat"), "w") as fd:
                 new_structure.to_lammps_data(fd)
         except Exception as e:
             print("ERROR! ", e.args)
@@ -25,15 +35,5 @@ def assign_pair_params_to_structure(structure):
     pair_params = get_pair_potential(pair_uff_keys)
     structure.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in pair_uff_keys]
 
-lmp_base_path = Path("mofs-functionalized")
-lmp_base_path.mkdir(exist_ok=True)
-
-linker = Atoms.from_cml(Path("linkers-cml/uio66.cml"))
-structure = Atoms.from_cif("mofs/uio66-P1.cif")
-assign_pair_params_to_structure(structure)
-functionalize_structure_with_linkers(structure, linker, Path("linkers-lmpdat").glob("uio66-*"))
-
-linker = Atoms.from_cml(Path("linkers-cml/uio67.cml"))
-structure = Atoms.from_cif("mofs/uio67-P1.cif")
-assign_pair_params_to_structure(structure)
-functionalize_structure_with_linkers(structure, linker, Path("linkers-lmpdat").glob("uio67-*"))
+if __name__ == '__main__':
+    functionalize_structure_with_linkers()

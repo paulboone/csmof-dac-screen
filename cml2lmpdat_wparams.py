@@ -1,6 +1,7 @@
 from collections import Counter
 from pathlib import Path
 
+import click
 import networkx as nx
 import numpy as np
 
@@ -37,7 +38,8 @@ def order_types(tup):
         return tuple(rev)
     return tuple(tup)
 
-def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmpdat_path):
+
+def cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path=None, outpath="-"):
 
     uff_rules = {
         "H": [
@@ -53,7 +55,10 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     }
     bond_order_rules = [({'N_1'}, 2), ({'N_1', 'N_2'}, 2)]
 
-    linker = Atoms.from_cml(linker_path)
+    linker = None
+    if linker_path is not None:
+        linker = Atoms.from_cml(linker_path)
+
     fnlinker = Atoms.from_cml(fnlinker_path)
 
     # assign uff atom types using mofun.rough_uff
@@ -66,28 +71,32 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     fnlinker.calc_angles()
     fnlinker.calc_dihedrals()
 
-    # remove any dihedrals, angles and bonds that are unchanged from the original linker,
-    # as we are only going to relax the new functional group, leaving everything else fixed.
-    print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
-    match_pairs = find_unchanged_atom_pairs(linker, fnlinker)
-    unchanged_atom_indices = []
-    if len(match_pairs) > 0:
-        unchanged_atom_indices = set(list(zip(*match_pairs))[1])
 
-    # assign atoms to molecules where 0 is original linker, 1 is for new functional group atoms
-    fnlinker.atom_groups = [0 if i in unchanged_atom_indices else 1 for i in range(len(fnlinker))]
+    if linker is not None:
+        # remove any dihedrals, angles and bonds that are unchanged from the original linker,
+        # as we are only going to relax the new functional group, leaving everything else fixed.
+        print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
+        match_pairs = find_unchanged_atom_pairs(linker, fnlinker)
+        unchanged_atom_indices = []
+        if len(match_pairs) > 0:
+            unchanged_atom_indices = set(list(zip(*match_pairs))[1])
+
+        # assign atoms to molecules where 0 is original linker, 1 is for new functional group atoms
+        fnlinker.atom_groups = [0 if i in unchanged_atom_indices else 1 for i in range(len(fnlinker))]
+
+        fnlinker.bonds = delete_if_all_in_set(fnlinker.bonds, unchanged_atom_indices)
+        fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
+
 
     # calculate potential parameters using atomoto, and assign type #s to linker
     fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*ruff.pair_params(a1), a1) for a1 in fnlinker.atom_type_labels]
 
-    fnlinker.bonds = delete_if_all_in_set(fnlinker.bonds, unchanged_atom_indices)
     bond_types = [order_types([uff_types[b1], uff_types[b2]]) for b1, b2 in fnlinker.bonds]
     unique_bond_types = list(dict.fromkeys(bond_types).keys())
     fnlinker.bond_types = [unique_bond_types.index(bt) for bt in bond_types]
     bond_params = [(*ruff.bond_params(a1, a2, bond_order_rules=bond_order_rules), "%s %s" % (a1, a2)) for (a1, a2) in unique_bond_types]
     fnlinker.bond_type_params = ['%10.6f %10.6f # %s' % params for params in bond_params]
 
-    fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
     angle_types = [order_types([uff_types[a] for a in atoms]) for atoms in fnlinker.angles]
     unique_angle_types = list(dict.fromkeys(angle_types).keys())
     fnlinker.angle_types = [unique_angle_types.index(a) for a in angle_types]
@@ -95,7 +104,9 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
     fnlinker.angle_type_params = [angle2lammpsdat(a) for a in angle_params]
 
     num_dihedrals_per_bond = Counter([order_types([a2, a3]) for _, a2, a3, _ in fnlinker.dihedrals])
-    fnlinker.dihedrals = delete_if_all_in_set(fnlinker.dihedrals, unchanged_atom_indices)
+    if linker is not None:
+        fnlinker.dihedrals = delete_if_all_in_set(fnlinker.dihedrals, unchanged_atom_indices)
+
     dihedral_types = [(*order_types([uff_types[a] for a in atoms]),
                             num_dihedrals_per_bond[order_types([atoms[1], atoms[2]])])
                         for atoms in fnlinker.dihedrals]
@@ -122,27 +133,26 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
 
     print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
 
-
     # output lammps-data file
-    with open(lmpdat_path, "w") as f:
+    with open(outpath, "w") as f:
         fnlinker.to_lammps_data(f)
 
-# convert UIO-66 linkers
-linker_path = Path("linkers-cml/uio66.cml")
-lmp_base_path = Path("linkers-lmpdat")
-for fnlinker_path in Path("linkers-cml").glob("uio66-*"):
-    print("\nreading %s" %fnlinker_path)
-    try:
-        cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmpdat"))
-    except Exception as e:
-        print("ERROR! ", e.args)
+@click.command()
+@click.argument('fnlinkers', nargs=-1, type=click.Path())
+@click.option('--linker-path', type=click.Path())
+@click.option('--outpath', '-o', type=click.Path())
+def cml2lmpdat_wparams(fnlinkers, linker_path=None, outpath=Path()):
+    outpath = Path(outpath)
+    print(outpath)
+    for fnlinker_path in fnlinkers:
+        fnlinker_path = Path(fnlinker_path)
+        print("\nreading %s" % fnlinker_path)
+        try:
+            print(linker_path, fnlinker_path)
+            cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path, outpath.joinpath(fnlinker_path.stem + ".lmpdat"))
+        except Exception as e:
+            print("ERROR! ", e.args)
 
-# convert UIO-67 linkers
-linker_path = Path("linkers-cml/uio67.cml")
-lmp_base_path = Path("linkers-lmpdat")
-for fnlinker_path in Path("linkers-cml").glob("uio67-*"):
-    print("\nreading %s" %fnlinker_path)
-    try:
-        cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp_base_path.joinpath(fnlinker_path.stem + ".lmpdat"))
-    except Exception as e:
-        print("ERROR! ", e.args)
+
+if __name__ == '__main__':
+    cml2lmpdat_wparams()
