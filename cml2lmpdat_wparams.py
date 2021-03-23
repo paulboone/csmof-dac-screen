@@ -49,7 +49,7 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(linker_path, fnlinker_path, lmp
             ("N_1", dict(neighbors=("N","N")))
         ],
         "O": [("O_1", dict(n=1))],
-        "C": [("C_R", dict(aromatic=True))]
+        "C": [("C_R", dict(n=3, aromatic=True))]
     }
     bond_order_rules = [({'N_1'}, 2), ({'N_1', 'N_2'}, 2)]
 
