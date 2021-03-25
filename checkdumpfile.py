@@ -32,7 +32,8 @@ def checkdumpfile(lmpdatpath, dumppath, warns=True, verbose=False):
     if verbose:
         zero_indices = [(i1,i2) for i1, i2 in np.argwhere(s_ss < 0.1) if i1 < i2]
         for i1, i2 in zero_indices:
-            print("WARNING: some atoms look like they are overlapped: %d %d dist=%6.4f" % (i1+1, i2+1, s_ss[i1,i2] ** 0.5))
+            print("WARNING: some atoms look like they are overlapped: %d %d (%s-%s) dist=%6.4f" %
+                (i1+1, i2+1, atoms.elements[i1], atoms.elements[i2], s_ss[i1,i2] ** 0.5))
 
     # check for bond distances
     dumpatoms.set_pbc(True)
@@ -48,7 +49,8 @@ def checkdumpfile(lmpdatpath, dumppath, warns=True, verbose=False):
             print("min bond length is %.2f Å" % min(bonddists))
     else:
         if len(min_dist_indices) > 0:
-            min_dist_indices_s = "(%4d %4d)" % (min_dist_indices[0][0] + 1, min_dist_indices[0][1] + 1)
+            min_dist_indices_s = "(%4d %4d %2s - %-2s)" % (min_dist_indices[0][0] + 1, min_dist_indices[0][1] + 1,
+                atoms.elements[min_dist_indices[0][0]], atoms.elements[min_dist_indices[0][1]])
         else:
             min_dist_indices_s = "(---- ----)"
 
