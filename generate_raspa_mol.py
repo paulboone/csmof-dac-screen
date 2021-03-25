@@ -11,7 +11,6 @@ from mofun import Atoms
 @click.argument('ciffile', type=click.File('r'))
 @click.argument('chargefile', type=click.File('r'))
 @click.argument('outputfile', type=click.File('w'))
-# def generate_raspa_mol(lmpdatpath, dumppath, chargefile, outputfile):
 def generate_raspa_mol(ciffile, chargefile, outputfile):
     atoms = Atoms.from_cif(ciffile)
 
