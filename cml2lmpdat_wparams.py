@@ -77,7 +77,7 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path=None
         # as we are only going to relax the new functional group, leaving everything else fixed.
         print("Num dihedrals, angles, bonds: %d, %d, %d" % (len(fnlinker.dihedrals), len(fnlinker.angles), len(fnlinker.bonds)))
         match_pairs = find_unchanged_atom_pairs(linker, fnlinker)
-        unchanged_atom_indices = []
+        unchanged_atom_indices = set()
         if len(match_pairs) > 0:
             unchanged_atom_indices = set(list(zip(*match_pairs))[1])
 
