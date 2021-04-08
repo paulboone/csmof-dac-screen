@@ -1,6 +1,7 @@
 
 import io
-import os
+# import os
+from pathlib import Path
 import random
 import subprocess
 
@@ -104,27 +105,48 @@ def extract_gas_atoms_from_packmol_xyz(packmol_xyz):
 
 
 @click.command()
-@click.argument('gas_lmpdat', type=click.File('r'))
 @click.argument('structure_xyz', type=click.Path())
+@click.argument('gas_lmpdat', type=click.Path())
 @click.argument('gas_xyz', type=click.Path())
-def packmol_gaslmpdat(gas_lmpdat, structure_xyz, gas_xyz):
-    output_gas_xyz = "packed_gas.xyz"
-    packmol_input = packmol_config(structure_xyz, gas_xyz, output_gas_xyz, num_molecules=1,
+@click.option('-n', '--num-molecules', type=int, default=1)
+def packmol_gaslmpdat(structure_xyz, gas_lmpdat, gas_xyz, num_molecules=1):
+    """ packs gas into structure using packmol and converts the result into a LAMMPS lmpdat file.
+
+    The resulting lmpdat file has only the gas molecules in it, according to the geometry and coeffs
+    of the gas_lmpdat file. Note that it is redundant to have both an XYZ file input and  LAMMPS
+    file input but we have it this way because this method is used in large-scale screenings and
+    both these files are generated at the beginning of the run.
+
+    Args:
+        structure_xyz: Path to xyz file of structure to pack the gas into.
+        gas_lmpdat: lmpdat file with geometry and coeffs for gas we are packing.
+        gas_xyz: xyz file of gas corresponding to the the gas_lmpdat. Atoms must be in the same order!
+        num_molecules (int): number of gas molecules to pack into structure.
+
+    """
+    gas_name = Path(gas_lmpdat).stem
+    structure_name = Path(structure_xyz).stem
+
+    output_gas_xyz = "%s_%s_packed.xyz" % (structure_name, gas_name)
+    packmol_input = packmol_config(structure_xyz, gas_xyz, output_gas_xyz, num_molecules=num_molecules,
         boundary_tolerance=0, a2a_tolerance=1.5, supercell=[20.7004, 20.7004, 20.7004, 90, 90 ,90])
 
-    with open("packmol.1.input", 'w') as f:
+    with open("packmol.input", 'w') as f:
         f.write(packmol_input)
-    subprocess.run("/Users/pboone/workspace/_prereqs/packmol/packmol < packmol.1.input", shell=True, check=True)
+    subprocess.run("/Users/pboone/workspace/_prereqs/packmol/packmol < packmol.input", shell=True, check=True)
     gas_data = np.array(extract_gas_atoms_from_packmol_xyz(output_gas_xyz))
 
     # update the dummy positions in the template gas lmpdat file with real positions from packmol
     # and save in the current directory. Note that this should NOT overwrite the template, since you
     # should be in a different directory at this point.
-    atoms = Atoms.from_lammps_data(gas_lmpdat, use_comment_for_type_labels=True)
+    atoms = Atoms.from_lammps_data(open(gas_lmpdat,'r'), use_comment_for_type_labels=True)
     atoms.positions = np.array(gas_data[:,1:], dtype=float)
 
-    atoms.to_lammps_data(open('gas.lmpdat', 'w'))
 
+    atoms.to_lammps_data(open("%s.lmpdat" % gas_name, 'w'))
+    Path("tmp").mkdir(exist_ok=True)
+    Path("packmol.input").rename("tmp/packmol.input")
+    Path(output_gas_xyz).rename(Path("tmp/") / output_gas_xyz)
     # atoms = Atoms(positions=np.array(gas_data[:,1:], dtype=float),
     #              atom_types=np.array(gas_data[:,0], dtype=int) - 1)
 
