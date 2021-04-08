@@ -140,8 +140,10 @@ def packmol_gaslmpdat(structure_xyz, gas_lmpdat, gas_xyz, num_molecules=1):
     # and save in the current directory. Note that this should NOT overwrite the template, since you
     # should be in a different directory at this point.
     atoms = Atoms.from_lammps_data(open(gas_lmpdat,'r'), use_comment_for_type_labels=True)
-    atoms.positions = np.array(gas_data[:,1:], dtype=float)
-
+    atoms.positions = np.array(gas_data[:, 1:], dtype=float)
+    atoms.atom_types = np.tile(atoms.atom_types, num_molecules)
+    atoms.charges = np.tile(atoms.charges, num_molecules)
+    atoms.atom_groups = np.repeat(np.arange(num_molecules), len(gas_data) / num_molecules)
 
     atoms.to_lammps_data(open("%s.lmpdat" % gas_name, 'w'))
     Path("tmp").mkdir(exist_ok=True)
