@@ -13,3 +13,8 @@ MANIFEST
 *.npy
 .DS_Store
 *.egg-info
+run-*/uio*/
+run-adsorption-rosenbluth-weights/Output/
+run-adsorption-rosenbluth-weights/Restart/
+run-adsorption-rosenbluth-weights/VTK/
+run-relax-NVT/charges/
