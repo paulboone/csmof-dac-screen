@@ -1,0 +1,33 @@
+SimulationType                  MonteCarlo
+NumberOfCycles                  50000
+NumberOfInitializationCycles    1000
+PrintEvery                      100
+RestartFile                     no
+Movies                          yes
+WriteMoviesEvery                100
+
+Forcefield                      Local
+UseChargesFromMOLFile           yes
+ChargeMethod                    Ewald
+CutOff                          14
+
+Framework                       0
+FrameworkName                   uio66-CF3-2
+InputFileType                   mol
+UnitCells                       2 2 2
+
+ExternalTemperature             373.15
+ExternalPressure                  0.62445
+# 1500 pascals (15 mbar) * CO2 PPM: 1500 * 416.3 / 1000000
+
+Component 0 MoleculeName              CO2
+            MoleculeDefinition        TraPPE
+            IdealGasRosenbluthWeight  1.00006
+            MolFraction                 1.0
+            FugacityCoefficient         1.0
+
+            SwapProbability             1.0
+            TranslationProbability      0.5
+            RotationProbability         0.5
+
+            CreateNumberOfMolecules     0

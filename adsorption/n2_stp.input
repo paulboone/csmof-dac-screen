@@ -1,0 +1,33 @@
+SimulationType                  MonteCarlo
+NumberOfCycles                  50000
+NumberOfInitializationCycles    1000
+PrintEvery                      100
+RestartFile                     no
+Movies                          yes
+WriteMoviesEvery                100
+
+Forcefield                      Local
+UseChargesFromMOLFile           yes
+ChargeMethod                    Ewald
+CutOff                          14
+
+Framework                       0
+FrameworkName                   uio66-CF3-2
+InputFileType                   mol
+UnitCells                       2 2 2
+
+ExternalTemperature             298
+ExternalPressure              79033.5
+# 1 atm in pascals * %N2: 101325 * 0.78
+
+Component 0 MoleculeName              N2
+            MoleculeDefinition        TraPPE
+            IdealGasRosenbluthWeight  1.00001
+            MolFraction                 1.0
+            FugacityCoefficient         1.0
+
+            SwapProbability             1.0
+            TranslationProbability      0.5
+            RotationProbability         0.5
+
+            CreateNumberOfMolecules     0

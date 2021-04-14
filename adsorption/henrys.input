@@ -1,0 +1,37 @@
+SimulationType                  MonteCarlo
+NumberOfCycles                  200000
+NumberOfInitializationCycles    1000
+PrintEvery                      10
+RestartFile                     no
+Movies                          no
+WriteMoviesEvery                10
+
+Forcefield                      Local
+CutOff                          14
+UseChargesFromMOLFile           yes
+ChargeMethod                    Ewald
+CutOff                          12.8
+
+Framework                       0
+FrameworkName                   uio66-CF3-2
+InputFileType                   mol
+UnitCells                       2 2 2
+ExternalTemperature             298
+
+Component 0 MoleculeName              CO2
+            MoleculeDefinition        TraPPE
+            IdealGasRosenbluthWeight  1.00006
+            WidomProbability          1.0
+            CreateNumberOfMolecules   0
+
+Component 1 MoleculeName              N2
+            MoleculeDefinition        TraPPE
+            IdealGasRosenbluthWeight  1.00001
+            WidomProbability          1.0
+            CreateNumberOfMolecules   0
+
+Component 2 MoleculeName              TIP4P-1
+            MoleculeDefinition        water
+            IdealGasRosenbluthWeight  1.0092
+            WidomProbability          1.0
+            CreateNumberOfMolecules   0
