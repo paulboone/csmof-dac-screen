@@ -1,0 +1,22 @@
+# general rule for shifted vs truncated
+shifted
+# general rule tailcorrections
+no
+# number of defined interactions
+13
+# Framework params from UFF; H2O from TIP4P-Ew; CO2 and N2 params from TraPPE
+H_             lennard-jones    22.14344779	 2.5711
+C_             lennard-jones    52.84231859	 3.4309
+N_             lennard-jones    34.72495222	 3.2607
+O_             lennard-jones    30.19561062	 3.1181
+F_             lennard-jones    25.16300885	 2.9970
+Zr_            lennard-jones    34.72495222	 2.7832
+Ow      lennard-jones    81.905593823025    3.16435
+Lw      none
+Hw      none
+O_co2          lennard-jones    79.0      3.05
+C_co2          lennard-jones    27.0      2.80
+N_n2           lennard-jones    36.0      3.31
+N_com   none
+# general mixing rule for Lennard-Jones
+Lorentz-Berthelot
