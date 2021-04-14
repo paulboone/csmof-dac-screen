@@ -17,12 +17,6 @@ def delete_if_all_in_set(arr, s):
             deletion_list.append(i)
     return np.delete(arr, deletion_list, axis=0)
 
-def atomoto2tup(param_dict):
-    return {tuple(key.split("-")): val for key, val in param_dict.items()}
-
-def tup2atomoto(tup):
-    return "-".join(tup)
-
 def angle2lammpsdat(params):
     if params[0] == "fourier":
         return '%s %10.6f %10.6f %10.6f %10.6f # %s' % params
@@ -88,7 +82,7 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path=None
         fnlinker.angles = delete_if_all_in_set(fnlinker.angles, unchanged_atom_indices)
 
 
-    # calculate potential parameters using atomoto, and assign type #s to linker
+    # calculate potential parameters and assign type #s to linker
     fnlinker.pair_params = ['%10.6f %10.6f # %s' % (*ruff.pair_params(a1), a1) for a1 in fnlinker.atom_type_labels]
 
     bond_types = [order_types([uff_types[b1], uff_types[b2]]) for b1, b2 in fnlinker.bonds]
