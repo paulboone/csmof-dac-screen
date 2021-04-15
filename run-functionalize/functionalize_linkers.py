@@ -2,10 +2,10 @@ from collections import Counter
 from pathlib import Path
 
 import click
-from lammps_tools.forcefields.uff.parameterize import get_pair_potential
 import numpy as np
 
 from mofun import Atoms, replace_pattern_in_structure
+from mofun.rough_uff import pair_params
 from mofun.uff4mof import uff_key_starts_with
 
 @click.command()
@@ -30,10 +30,10 @@ def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers,
 
 def assign_pair_params_to_structure(structure):
     # NOTE: in UFF, pair params should always be the same for atoms of the same element, regardless of type
-    pair_uff_keys = [uff_key_starts_with(el.ljust(2, "_"))[0] for el in structure.atom_type_elements]
-    structure.atom_type_labels = pair_uff_keys
-    pair_params = get_pair_potential(pair_uff_keys)
-    structure.pair_params = ['%10.6f %10.6f # %s' % (*pair_params[label], label) for label in pair_uff_keys]
+    # DUPLICATE in cif2lmpdat_wcharges.py: should be refactored
+    uff_keys = [uff_key_starts_with(el.ljust(2, "_"))[0] for el in structure.atom_type_elements]
+    structure.pair_params = ['%10.6f %10.6f # %s' % (*pair_params(k), k) for k in uff_keys]
+    structure.atom_type_labels = uff_keys
 
 if __name__ == '__main__':
     functionalize_structure_with_linkers()
