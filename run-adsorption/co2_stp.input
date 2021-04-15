@@ -1,7 +1,7 @@
 SimulationType                  MonteCarlo
 NumberOfCycles                  50000
 NumberOfInitializationCycles    1000
-PrintEvery                      100
+PrintEvery                      1000
 RestartFile                     no
 Movies                          yes
 WriteMoviesEvery                100
@@ -9,7 +9,7 @@ WriteMoviesEvery                100
 Forcefield                      Local
 UseChargesFromMOLFile           yes
 ChargeMethod                    Ewald
-CutOff                          14
+CutOff                          12.8
 
 Framework                       0
 FrameworkName                   uio66-CF3-2

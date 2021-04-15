@@ -1,13 +1,12 @@
 SimulationType                  MonteCarlo
-NumberOfCycles                  200000
+NumberOfCycles                  20000
 NumberOfInitializationCycles    1000
-PrintEvery                      10
+PrintEvery                      1000
 RestartFile                     no
 Movies                          no
 WriteMoviesEvery                10
 
 Forcefield                      Local
-CutOff                          14
 UseChargesFromMOLFile           yes
 ChargeMethod                    Ewald
 CutOff                          12.8
