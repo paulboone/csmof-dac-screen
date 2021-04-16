@@ -1,0 +1,86 @@
+#
+# use -var mofpath <mof-path> -var gaspath <gas-path>
+#
+# TEST FOR USING NVE
+
+variable simTemp equal 298
+variable dt equal 1.0
+variable randomSeed equal 123123
+variable mofAtomTypes equal 4
+
+units           real
+atom_style      full
+boundary        p p p
+
+pair_style      lj/cut/coul/long 12.500
+bond_style      harmonic
+kspace_style    pppm 0.0001
+
+dielectric      1.0
+pair_modify     tail yes mix arithmetic
+
+read_data ${mofpath} group mof extra/atom/types 2
+read_data ${gaspath} group gas add append offset ${mofAtomTypes} 0 0 0 0
+velocity gas create ${simTemp} ${randomSeed} dist gaussian
+group gasCenters type $(v_mofAtomTypes + 2) # use center carbon for GK
+
+neigh_modify exclude molecule/intra mof
+neigh_modify exclude molecule/inter mof
+
+# No pair potentials between atoms in a gas. Probably redundant.
+neigh_modify exclude molecule/intra gas
+
+# No pair potentials between different gas molecules. This is so that we can simulate X gas
+# molecules in the same simulation, without them interacting with each other (assuming ideal gas).
+# neigh_modify exclude molecule/inter gas
+
+info groups
+
+print ""
+print "** NVT 0.1 fs equilibration ** "
+compute gastemp gas temp
+thermo_style custom step c_gastemp temp etotal
+thermo         100
+thermo_modify  flush yes
+timestep        0.1 #fs
+fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+run           10000
+unfix integrate_fn
+
+print ""
+print "** BRIEF NVT 1.0 fs equilibration ** "
+timestep        ${dt} #fs
+fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+run           100000
+unfix integrate_fn
+
+print ""
+print "** NVE EQUILIBRATION ** "
+thermo         100
+thermo_modify  flush yes
+dump xyzdump all xyz 100 nve-eq.dump.*.xyz
+dump trajectory_dump gas custom 100 gaseq.lammpstrj id type mol mass xu yu zu
+
+fix d_int_rigid gas rigid/nve/small molecule
+run 50000
+unfix d_int_rigid
+undump xyzdump
+undump trajectory_dump
+
+print ""
+print "** NVE RUN ** "
+# VACF methodology from http://lammps.sandia.gov/doc/compute_vacf.html
+compute vacfGas gasCenters vacf
+fix             vacfVector all vector 1000 c_vacfGas[4]
+variable        diffusivity equal v_dt*trap(f_vacfVector)
+thermo_style custom step c_gastemp temp etotal c_vacfGas[4] v_diffusivity
+
+# methodology from Samir (for MSD and VACF)
+dump trajectory_dump gas custom 10 gas.lammpstrj id type mol mass xu yu zu
+dump xyzdump all xyz 100000 nve.dump.*.xyz
+
+thermo         1000
+thermo_modify flush yes
+restart        100000 nve.*.restart
+fix d_int_rigid gas rigid/nve/small molecule
+run           1000000
