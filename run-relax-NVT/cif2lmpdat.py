@@ -10,15 +10,22 @@ from mofun.uff4mof import uff_key_starts_with
 
 @click.command()
 @click.argument('ciffile', type=click.File('r'))
-@click.argument('chargefile', type=click.File('r'))
 @click.argument('outputfile', type=click.File('w'))
-def cif2lmpdat_wcharges(ciffile, chargefile, outputfile):
+@click.option('-q', '--chargefile', type=click.File('r'))
+@click.option('--mic', type=float, help="enforce minimum image convention using a cutoff of mic")
+def cif2lmpdat(ciffile, outputfile, chargefile=None, mic=None):
     atoms = Atoms.from_cif(ciffile)
 
     # update charges
-    charges = np.array([float(line.strip()) for line in chargefile if line.strip() != ''])
-    assert len(charges) == len(atoms.positions)
-    atoms.charges = charges
+    if chargefile is not None:
+        charges = np.array([float(line.strip()) for line in chargefile if line.strip() != ''])
+        assert len(charges) == len(atoms.positions)
+        atoms.charges = charges
+
+    # replicate to meet minimum image convention, if necessary
+    if mic is not None:
+        repls = np.array(np.ceil(2*mic / np.diag(atoms.cell)), dtype=int)
+        atoms = atoms.replicate(repls)
 
     assign_pair_params_to_structure(atoms)
     atoms.to_lammps_data(outputfile)
@@ -31,4 +38,4 @@ def assign_pair_params_to_structure(structure):
     structure.atom_type_labels = uff_keys
 
 if __name__ == '__main__':
-    cif2lmpdat_wcharges()
+    cif2lmpdat()
