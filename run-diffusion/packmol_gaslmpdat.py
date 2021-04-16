@@ -105,19 +105,22 @@ def extract_gas_atoms_from_packmol_xyz(packmol_xyz):
 
 
 @click.command()
+
+@click.argument('structure_lmpdat', type=click.File('r'))
 @click.argument('structure_xyz', type=click.Path())
 @click.argument('gas_lmpdat', type=click.Path())
 @click.argument('gas_xyz', type=click.Path())
 @click.option('-n', '--num-molecules', type=int, default=1)
-def packmol_gaslmpdat(structure_xyz, gas_lmpdat, gas_xyz, num_molecules=1):
+def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_molecules=1):
     """ packs gas into structure using packmol and converts the result into a LAMMPS lmpdat file.
 
     The resulting lmpdat file has only the gas molecules in it, according to the geometry and coeffs
-    of the gas_lmpdat file. Note that it is redundant to have both an XYZ file input and  LAMMPS
+    of the gas_lmpdat file. Note that it is redundant to have both an XYZ file input and LAMMPS
     file input but we have it this way because this method is used in large-scale screenings and
     both these files are generated at the beginning of the run.
 
     Args:
+        structure_lmpdat: lmpdat file of structure; this is used to get the unit cell for packmol.
         structure_xyz: Path to xyz file of structure to pack the gas into.
         gas_lmpdat: lmpdat file with geometry and coeffs for gas we are packing.
         gas_xyz: xyz file of gas corresponding to the the gas_lmpdat. Atoms must be in the same order!
@@ -127,9 +130,11 @@ def packmol_gaslmpdat(structure_xyz, gas_lmpdat, gas_xyz, num_molecules=1):
     gas_name = Path(gas_lmpdat).stem
     structure_name = Path(structure_xyz).stem
 
+    satoms = Atoms.from_lammps_data(structure_lmpdat, use_comment_for_type_labels=True)
+
     output_gas_xyz = "%s_%s_packed.xyz" % (structure_name, gas_name)
     packmol_input = packmol_config(structure_xyz, gas_xyz, output_gas_xyz, num_molecules=num_molecules,
-        boundary_tolerance=0, a2a_tolerance=1.5, supercell=[20.7004, 20.7004, 20.7004, 90, 90 ,90])
+        boundary_tolerance=0, a2a_tolerance=1.5, supercell=[*np.diag(satoms.cell), 90, 90, 90])
 
     with open("packmol.input", 'w') as f:
         f.write(packmol_input)
