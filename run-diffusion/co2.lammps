@@ -48,7 +48,7 @@ run           10000
 unfix integrate_fn
 
 print ""
-print "** BRIEF NVT 1.0 fs equilibration ** "
+print "** NVT 1.0 fs equilibration ** "
 timestep        ${dt} #fs
 fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
 run           100000
@@ -58,14 +58,10 @@ print ""
 print "** NVE EQUILIBRATION ** "
 thermo         100
 thermo_modify  flush yes
-dump xyzdump all xyz 100 nve-eq.dump.*.xyz
-dump trajectory_dump gas custom 100 gaseq.lammpstrj id type mol mass xu yu zu
 
 fix d_int_rigid gas rigid/nve/small molecule
 run 50000
 unfix d_int_rigid
-undump xyzdump
-undump trajectory_dump
 
 print ""
 print "** NVE RUN ** "
@@ -76,11 +72,10 @@ variable        diffusivity equal v_dt*trap(f_vacfVector)
 thermo_style custom step c_gastemp temp etotal c_vacfGas[4] v_diffusivity
 
 # methodology from Samir (for MSD and VACF)
-dump trajectory_dump gas custom 10 gas.lammpstrj id type mol mass xu yu zu
-dump xyzdump all xyz 100000 nve.dump.*.xyz
+dump trajectory_dump gas custom/gz 10 gas.lammpstrj id type mol mass xu yu zu
 
 thermo         1000
 thermo_modify flush yes
 restart        100000 nve.*.restart
 fix d_int_rigid gas rigid/nve/small molecule
-run           1000000
+run           10000000
