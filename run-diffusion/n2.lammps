@@ -20,7 +20,7 @@ dielectric      1.0
 pair_modify     tail yes mix arithmetic
 
 read_data ${mofpath} group mof extra/atom/types 2
-read_data co2.lmpdat group gas add append offset ${mofAtomTypes} 0 0 0 0
+read_data n2.lmpdat group gas add append offset ${mofAtomTypes} 0 0 0 0
 velocity gas create ${simTemp} ${randomSeed} dist gaussian
 group gasCenters type $(v_mofAtomTypes + 2) # use center carbon for GK
 

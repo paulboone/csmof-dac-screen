@@ -12,15 +12,20 @@ units           real
 atom_style      full
 boundary        p p p
 
-pair_style      lj/cut/coul/long 12.500
+pair_style      lj/cut/tip4p/long $(v_mofAtomTypes + 1) $(v_mofAtomTypes + 2) 1 1 0.125 12
 bond_style      harmonic
-kspace_style    pppm 0.0001
+angle_style     harmonic
+kspace_style    pppm/tip4p 0.0001
+
 
 dielectric      1.0
 pair_modify     tail yes mix arithmetic
 
-read_data ${mofpath} group mof extra/atom/types 2
-read_data co2.lmpdat group gas add append offset ${mofAtomTypes} 0 0 0 0
+read_data ${mofpath} group mof extra/atom/types 2 extra/bond/types 1 extra/angle/types 1 extra/bond/per/atom 2 extra/angle/per/atom 1
+read_data tip4p.lmpdat group gas add append offset ${mofAtomTypes} 0 0 0 0
+
+
+
 velocity gas create ${simTemp} ${randomSeed} dist gaussian
 group gasCenters type $(v_mofAtomTypes + 2) # use center carbon for GK
 
@@ -43,25 +48,30 @@ thermo_style custom step c_gastemp temp etotal
 thermo         100
 thermo_modify  flush yes
 timestep        0.1 #fs
-fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
+fix integrate_fn gas nvt temp ${simTemp} ${simTemp} $(v_dt * 100)
 run           10000
+unfix shake_fn
 unfix integrate_fn
 
 print ""
 print "** NVT 1.0 fs equilibration ** "
 timestep        ${dt} #fs
-fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
+fix integrate_fn gas nvt temp ${simTemp} ${simTemp} $(v_dt * 100)
 run           100000
+unfix shake_fn
 unfix integrate_fn
 
 print ""
 print "** NVE EQUILIBRATION ** "
 thermo         100
 thermo_modify  flush yes
-
-fix d_int_rigid gas rigid/nve/small molecule
+fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
+fix nve_fn gas nve
 run 50000
-unfix d_int_rigid
+unfix shake_fn
+unfix nve_fn
 
 print ""
 print "** NVE RUN ** "
@@ -77,5 +87,6 @@ dump trajectory_dump gas custom/gz 10 gas.lammpstrj.gz id type mol mass xu yu zu
 thermo         1000
 thermo_modify flush yes
 restart        100000 nve.*.restart
-fix d_int_rigid gas rigid/nve/small molecule
+fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
+fix integrate_fn gas nve
 run           10000000

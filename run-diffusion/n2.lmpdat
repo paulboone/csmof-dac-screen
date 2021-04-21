@@ -1,0 +1,26 @@
+ (written by mofun)
+
+3 atoms
+0 bonds
+0 angles
+0 dihedrals
+0 impropers
+
+2 atom types
+
+
+Masses
+
+ 1 14.00673   # N
+ 2  0.00001   # N COM
+
+Pair Coeffs
+
+ 1   0.069      3.260689308393642  # N
+ 2   0.0        0.0      # charge center
+
+Atoms
+
+ 1 1 1   -0.482  0.00000   0.00000   0.00000  # N
+ 2 1 2    0.964  0.54485   0.00000   0.00000  # COM
+ 3 1 1   -0.482  1.08970   0.00000   0.00000  # N
