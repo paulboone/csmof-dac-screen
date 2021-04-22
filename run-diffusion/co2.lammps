@@ -56,26 +56,28 @@ unfix integrate_fn
 
 print ""
 print "** NVE EQUILIBRATION ** "
-thermo         100
-thermo_modify  flush yes
-
 fix d_int_rigid gas rigid/nve/small molecule
 run 50000
 unfix d_int_rigid
 
 print ""
 print "** NVE RUN ** "
+write_restart nve0.restart
+
 # VACF methodology from http://lammps.sandia.gov/doc/compute_vacf.html
 compute vacfGas gasCenters vacf
 fix             vacfVector all vector 1000 c_vacfGas[4]
 variable        diffusivity equal v_dt*trap(f_vacfVector)
-thermo_style custom step c_gastemp temp etotal c_vacfGas[4] v_diffusivity
+
+compute msd gasCenters msd
+thermo_style custom step c_gastemp temp etotal c_vacfGas[4] v_diffusivity c_msd[4]
 
 # methodology from Samir (for MSD and VACF)
-dump trajectory_dump gas custom/gz 10 gas.lammpstrj.gz id type mol mass xu yu zu
+dump trajectory_dump gas custom/gz 1000 gas.lammpstrj.gz id type mol mass xu yu zu
 
 thermo         1000
 thermo_modify flush yes
-restart        100000 nve.*.restart
 fix d_int_rigid gas rigid/nve/small molecule
 run           10000000
+
+write_restart nve.finish.restart
