@@ -51,7 +51,7 @@ print ""
 print "** NVT 1.0 fs equilibration ** "
 timestep        ${dt} #fs
 fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
-run           100000
+run           200000
 unfix integrate_fn
 
 print ""
