@@ -4,7 +4,8 @@ for mof in ../run-relax-NVT/mofs-relaxed-mols/*.mol
   set mofname (basename $mof .mol)
   for raspa_input in *.input
     set gasprocess (basename $raspa_input .input)
-    set mofprocessdir $mofname-$gasprocess
+    set mofprocessdir {$mofname}_{$gasprocess}
+
     mkdir $mofprocessdir
     cp $mof $mofprocessdir/
     cp ./*.def $mofprocessdir/
