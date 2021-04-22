@@ -12,22 +12,17 @@ units           real
 atom_style      full
 boundary        p p p
 
-pair_style      lj/cut/tip4p/long $(v_mofAtomTypes + 1) $(v_mofAtomTypes + 2) 1 1 0.125 12
+pair_style      lj/cut/coul/long 12.500
 bond_style      harmonic
-angle_style     harmonic
-kspace_style    pppm/tip4p 0.0001
-
+kspace_style    pppm 0.0001
 
 dielectric      1.0
 pair_modify     tail yes mix arithmetic
 
-read_data ${mofpath} group mof extra/atom/types 2 extra/bond/types 1 extra/angle/types 1 extra/bond/per/atom 2 extra/angle/per/atom 1
+read_data ${mofpath} group mof extra/atom/types 3
 read_data tip4p.lmpdat group gas add append offset ${mofAtomTypes} 0 0 0 0
-
-
-
 velocity gas create ${simTemp} ${randomSeed} dist gaussian
-group gasCenters type $(v_mofAtomTypes + 2) # use center carbon for GK
+group gasCenters type $(v_mofAtomTypes + 3) # use Oq
 
 neigh_modify exclude molecule/intra mof
 neigh_modify exclude molecule/inter mof
@@ -48,45 +43,41 @@ thermo_style custom step c_gastemp temp etotal
 thermo         100
 thermo_modify  flush yes
 timestep        0.1 #fs
-fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
-fix integrate_fn gas nvt temp ${simTemp} ${simTemp} $(v_dt * 100)
+fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
 run           10000
-unfix shake_fn
 unfix integrate_fn
 
 print ""
 print "** NVT 1.0 fs equilibration ** "
 timestep        ${dt} #fs
-fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
-fix integrate_fn gas nvt temp ${simTemp} ${simTemp} $(v_dt * 100)
-run           100000
-unfix shake_fn
+fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+run           10000 #200000
 unfix integrate_fn
 
 print ""
 print "** NVE EQUILIBRATION ** "
-thermo         100
-thermo_modify  flush yes
-fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
-fix nve_fn gas nve
-run 50000
-unfix shake_fn
-unfix nve_fn
+fix d_int_rigid gas rigid/nve/small molecule
+run 10000 #50000
+unfix d_int_rigid
 
 print ""
 print "** NVE RUN ** "
+write_restart nve0.restart
+
 # VACF methodology from http://lammps.sandia.gov/doc/compute_vacf.html
 compute vacfGas gasCenters vacf
 fix             vacfVector all vector 1000 c_vacfGas[4]
 variable        diffusivity equal v_dt*trap(f_vacfVector)
-thermo_style custom step c_gastemp temp etotal c_vacfGas[4] v_diffusivity
+
+compute msd gasCenters msd
+thermo_style custom step c_gastemp temp etotal c_vacfGas[4] v_diffusivity c_msd[4]
 
 # methodology from Samir (for MSD and VACF)
-dump trajectory_dump gas custom/gz 10 gas.lammpstrj.gz id type mol mass xu yu zu
+dump trajectory_dump gas custom/gz 1000 gas.lammpstrj.gz id type mol mass xu yu zu
 
 thermo         1000
 thermo_modify flush yes
-restart        100000 nve.*.restart
-fix shake_fn gas shake 1.0e-4 200 100 b 1 a 1
-fix integrate_fn gas nve
+fix d_int_rigid gas rigid/nve/small molecule
 run           10000000
+
+write_restart nve.finish.restart
