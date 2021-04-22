@@ -1,6 +1,6 @@
 
 # make independent configs
-for mof in ../run-relax-NVT/mofs-relaxed-cifs/*CF3-2.cif
+for mof in ../run-relax-NVT/mofs-relaxed-cifs/*
   set mofname (basename $mof .cif)
 
   for gas in *.lammps
