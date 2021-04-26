@@ -1,6 +1,12 @@
 
+set -l sourcemofs ../run-relax-NVT/mofs-relaxed-cifs/*
+if count $argv
+  set sourcemofs $argv[1]
+  echo $sourcemofs
+end
+echo $sourcemofs
 # make independent configs
-for mof in ../run-relax-NVT/mofs-relaxed-cifs/*
+for mof in $sourcemofs
   set mofname (basename $mof .cif)
 
   for gas in *.lammps
