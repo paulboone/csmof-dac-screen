@@ -134,7 +134,7 @@ def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_
 
     output_gas_xyz = "%s_%s_packed.xyz" % (structure_name, gas_name)
     packmol_input = packmol_config(structure_xyz, gas_xyz, output_gas_xyz, num_molecules=num_molecules,
-        boundary_tolerance=0, a2a_tolerance=1.5, supercell=[*np.diag(satoms.cell), 90, 90, 90])
+        boundary_tolerance=1.5, a2a_tolerance=1.5, supercell=[*np.diag(satoms.cell), 90, 90, 90])
 
     with open("packmol.input", 'w') as f:
         f.write(packmol_input)
