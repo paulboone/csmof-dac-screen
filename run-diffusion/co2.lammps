@@ -37,13 +37,19 @@ neigh_modify exclude molecule/intra gas
 info groups
 
 print ""
-print "** NVT 0.1 fs equilibration ** "
+print "** Setup thermo and velocity ** "
 compute gastemp gas temp
-thermo_style custom step c_gastemp temp etotal
+thermo_style custom step c_gastemp temp press etotal
 thermo         100
 thermo_modify  flush yes
 timestep        0.1 #fs
 fix integrate_fn gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+velocity gas create ${simTemp} ${randomSeed} dist gaussian
+run 0
+velocity gas scale ${simTemp}
+
+print ""
+print "** NVT 0.1 fs equilibration ** "
 run           10000
 unfix integrate_fn
 
