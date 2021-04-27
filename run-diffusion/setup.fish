@@ -1,7 +1,7 @@
 
 set -l sourcemofs ../run-relax-NVT/mofs-relaxed-cifs/*
 if count $argv
-  set sourcemofs $argv[1]
+  set sourcemofs $argv
   echo $sourcemofs
 end
 echo $sourcemofs
