@@ -2,9 +2,7 @@
 set -l sourcemofs ../run-relax-NVT/mofs-relaxed-cifs/*
 if count $argv
   set sourcemofs $argv
-  echo $sourcemofs
 end
-echo $sourcemofs
 # make independent configs
 for mof in $sourcemofs
   set mofname (basename $mof .cif)
