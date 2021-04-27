@@ -56,13 +56,15 @@ unfix integrate_fn
 
 print ""
 print "** NVE EQUILIBRATION ** "
+reset_timestep 0
 fix d_int_rigid gas rigid/nve/small molecule
-run 50000
+restart       50000 nve-eq.*.restart
+run           50000
 unfix d_int_rigid
 
 print ""
 print "** NVE RUN ** "
-write_restart nve0.restart
+reset_timestep 0
 
 # VACF methodology from http://lammps.sandia.gov/doc/compute_vacf.html
 compute vacfGas gasCenters vacf
@@ -78,6 +80,5 @@ dump trajectory_dump gas custom/gz 1000 gas.lammpstrj.gz id type mol mass xu yu 
 thermo         1000
 thermo_modify flush yes
 fix d_int_rigid gas rigid/nve/small molecule
+restart       10000000 nve.*.restart
 run           10000000
-
-write_restart nve.finish.restart
