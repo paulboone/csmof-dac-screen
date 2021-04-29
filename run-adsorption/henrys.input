@@ -1,19 +1,19 @@
 SimulationType                  MonteCarlo
-NumberOfCycles                  200000
-NumberOfInitializationCycles    10000
+NumberOfCycles                  50000
+NumberOfInitializationCycles    1000
 PrintEvery                      1000
 RestartFile                     no
 Movies                          no
 WriteMoviesEvery                10
 
 Forcefield                      Local
-UseChargesFromMOLFile           yes
+UseChargesFromCIFFile           yes
 ChargeMethod                    Ewald
 CutOff                          12.8
 
 Framework                       0
 FrameworkName                   uio66-CF3-2
-InputFileType                   mol
+InputFileType                   cif
 UnitCells                       2 2 2
 ExternalTemperature             298
 

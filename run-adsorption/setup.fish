@@ -1,6 +1,6 @@
 
 
-for mof in ../run-relax-NVT/mofs-relaxed-mols/*.mol
+for mof in ../run-eqeq/cifs-w-charges/*.cif
   set mofname (basename $mof .mol)
   for raspa_input in *.input
     set gasprocess (basename $raspa_input .input)

@@ -7,13 +7,13 @@ Movies                          yes
 WriteMoviesEvery                100
 
 Forcefield                      Local
-UseChargesFromMOLFile           yes
+UseChargesFromCIFFile           yes
 ChargeMethod                    Ewald
 CutOff                          12.8
 
 Framework                       0
 FrameworkName                   uio66-CF3-2
-InputFileType                   mol
+InputFileType                   cif
 UnitCells                       2 2 2
 
 ExternalTemperature             373.15
