@@ -1,0 +1,22 @@
+SimulationType                  MonteCarlo
+NumberOfCycles                  0
+NumberOfInitializationCycles    0
+RestartFile                     no
+Movies                          no
+WriteMoviesEvery                10
+
+Forcefield                      Local
+
+ChargeFromChargeEquilibration    yes
+ChargeEquilibrationPeriodic      yes
+ChargeEquilibrationEwald         yes
+SymmetrizeFrameworkCharges       no
+
+ChargeMethod                    Ewald
+CutOff                          12.8
+
+Framework                       0
+FrameworkName                   uio66-CF3-2
+InputFileType                   MOL
+
+# ExternalTemperature             298
