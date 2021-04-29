@@ -160,20 +160,3 @@ def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_
 
 if __name__ == '__main__':
     packmol_gaslmpdat()
-
-# #     ### output LAMMPS modification script
-# #     with open("modify_lammps.sh", 'w') as f:
-# #         random_seed = random.randint(0, 999999999)
-# #         modify_lammps_script = """#!/bin/bash
-# # if [ -z "$1" ]; then echo "USAGE: ./modify_lammps.sh <config.lammps>" && exit 1; fi
-# # sed -i orig -e 's|^variable frameworkDataFile string .*$|variable frameworkDataFile string %s|' $1
-# # sed -i ''   -e 's|^variable gasDataFile string .*$|variable gasDataFile string %s|' $1
-# # sed -i ''   -e 's|^variable mofAtoms equal \d*.*$|variable mofAtoms equal %d|' $1
-# # sed -i ''   -e 's|^variable mofBonds equal \d*.*$|variable mofBonds equal %d|' $1
-# # sed -i ''   -e 's|^variable mofAngles equal \d*.*$|variable mofAngles equal %d|' $1
-# # sed -i ''   -e 's|^variable mofDihedrals equal \d*.*$|variable mofDihedrals equal %d|' $1
-# # sed -i ''   -e 's|^variable mofImpropers equal \d*.*$|variable mofImpropers equal %d|' $1
-# # sed -i ''   -e 's|^variable randomSeed equal \d*.*$|variable randomSeed equal %d|' $1
-# # """ % tuple([mof_lammps_data_file, gas_lammps_data_file] + num_types + [random_seed])
-# #         f.write(modify_lammps_script)
-#
