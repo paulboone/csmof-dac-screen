@@ -21,7 +21,6 @@ pair_modify     tail yes mix arithmetic
 
 read_data ${mofpath} group mof extra/atom/types 3
 read_data tip4p.lmpdat group gas add append offset ${mofAtomTypes} 0 0 0 0
-velocity gas create ${simTemp} ${randomSeed} dist gaussian
 group gasCenters type $(v_mofAtomTypes + 3) # use Oq
 
 neigh_modify exclude molecule/intra mof
@@ -61,15 +60,7 @@ run           200000
 unfix integrate_fn
 
 print ""
-print "** NVE EQUILIBRATION ** "
-reset_timestep 0
-fix d_int_rigid gas rigid/nve/small molecule
-restart       50000 nve-eq.*.restart
-run           50000
-unfix d_int_rigid
-
-print ""
-print "** NVE RUN ** "
+print "** nvt RUN ** "
 reset_timestep 0
 
 # VACF methodology from http://lammps.sandia.gov/doc/compute_vacf.html
@@ -85,6 +76,6 @@ dump trajectory_dump gas custom/gz 1000 gas.lammpstrj.gz id type mol mass xu yu 
 
 thermo         1000
 thermo_modify flush yes
-fix d_int_rigid gas rigid/nve/small molecule
-restart       10000000 nve.*.restart
+fix d_int_rigid gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
+restart       10000000 nvt.*.restart
 run           10000000

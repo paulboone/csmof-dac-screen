@@ -1,5 +1,5 @@
 
-set -l sourcemofs ../run-relax-NVT/mofs-relaxed-cifs/*
+set -l sourcemofs ../run-eqeq/cifs-w-charges/*
 if count $argv
   set sourcemofs $argv
 end
