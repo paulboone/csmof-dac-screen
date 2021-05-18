@@ -2,6 +2,7 @@ set -l sourcemofs ../run-relax-NVT/mofs-relaxed-mols/*
 if count $argv
   set sourcemofs $argv
 end
+echo "using: $sourcemofs"
 # make independent configs
 mkdir -p cifs-w-charges
 for mof in $sourcemofs
