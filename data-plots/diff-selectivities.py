@@ -51,13 +51,13 @@ def d_selectivity(csv_path, outputpath="diff-selectivity.png", plotnum=0):
             x, y = (data.log_CO2_H2O[i], data.log_CO2_N2[i])
             if (1.1 < x < 3.3) and (-0.6 < y < 0.1):
                 if mof in ["UIO-67", "UIO-67 2x alkane-OC$_4$", "UIO-67 branched-HNC$_5$", "UIO-67 alkane-HNC$_4$"]:
-                    ax.annotate(moflabels[i], (x, y), size=5, xytext=(x-0.03,y - 0.), horizontalalignment='right', verticalalignment='center', fontsize=7)
+                    ax.annotate(moflabels[i] + " - %3.1f" % (float(data.CO2[i]) * 1e4), (x, y), size=5, xytext=(x-0.03,y - 0.), horizontalalignment='right', verticalalignment='center', fontsize=7)
                 else:
-                    ax.annotate(moflabels[i], (x, y), size=5, xytext=(x+0.03,y - 0.), horizontalalignment='left', verticalalignment='center', fontsize=7)
+                    ax.annotate(moflabels[i] + " - %3.1f" % (float(data.CO2[i]) * 1e4), (x, y), size=5, xytext=(x+0.03,y - 0.), horizontalalignment='left', verticalalignment='center', fontsize=7)
 
     ax.legend()
     # fig.subplots_adjust(wspace=0.05, hspace=0.05)
-    fig.savefig(outputpath, dpi=300, bbox_inches='tight')
+    fig.savefig(outputpath, dpi=300, bbox_inches='tight', transparent=True)
     plt.close(fig)
 
 if __name__ == '__main__':
