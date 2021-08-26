@@ -14,7 +14,7 @@ fsl = fs = 9
 @click.option('--outputpath', '-o', type=click.Path(), default="ads-selectivity.png")
 @click.option('--plotnum', '-n', type=int, default=0)
 def ads_selectivity(csv_path, outputpath="ads-selectivity.png", plotnum=0):
-    fig = plt.figure(figsize=(6, 6))
+    fig = plt.figure(figsize=(7., 7.))
 
     data = pd.read_csv(csv_path) # index_col=["mof"]
     data["log_CO2_H2O"] = np.log10(data["co2/h2o selectivity"])
@@ -29,10 +29,10 @@ def ads_selectivity(csv_path, outputpath="ads-selectivity.png", plotnum=0):
     ax.set_xlabel('log$_{10}$ CO$_2$/H$_2$O adsorption selectivity', fontsize=fsl)
     ax.set_ylabel('log$_{10}$ CO$_2$/N$_2$ adsorption selectivity', fontsize=fsl)
 
-    def anno(idx, alignment='left', xytextoffset=(0,0), fontsize=7):
+    def anno(idx, alignment='left', xytextoffset=(0,0), fontsize=fsl):
         x, y = (data.log_CO2_H2O[idx], data.log_CO2_N2[idx])
         if alignment=='left':
-            xytext = (4, -0.5)
+            xytext = (4, -1.0)
         else:
             xytext = (-4, -0.5)
         ax.annotate(data.moflabels[idx] + " - %3.2f" % (float(data.loading_co2[idx])), (x, y), size=5,
@@ -43,8 +43,31 @@ def ads_selectivity(csv_path, outputpath="ads-selectivity.png", plotnum=0):
         sc2 = ax.scatter(uio67.log_CO2_H2O, uio67.log_CO2_N2, zorder=2, s=20, marker= r'$\bowtie$', label="UIO-67", c="mediumseagreen")
         ax.set_xlim(-3, 3)
         ax.set_xticks([-2., -1, 0., 1, 2])
-        ax.set_ylim(-1, 3)
-        ax.set_yticks([0., 1., 2.])
+        ax.set_ylim(-1.1, 3)
+        ax.set_yticks([-1, 0., 1., 2.])
+
+        ax.axline([0,0], slope=-1, ls="--", color=".8", zorder=1)
+        ax.annotate("0", (-3,3), size=5, xytext=(9,-2), textcoords='offset points',
+            horizontalalignment="left", verticalalignment='top', fontsize=fsl, c=".5")
+        ax.axline([1,1], slope=-1, ls="--", color=".8", zorder=1)
+        ax.annotate("+2", (-1,3), size=5, xytext=(9,-2), textcoords='offset points',
+            horizontalalignment="left", verticalalignment='top', fontsize=fsl, c=".5")
+        ax.axline([2,2], slope=-1, ls="--", color=".8", zorder=1)
+        ax.annotate("+4", (1,3), size=5, xytext=(9,-2), textcoords='offset points',
+            horizontalalignment="left", verticalalignment='top', fontsize=fsl, c=".5")
+
+        subplot = 1
+        for idx in data.index:
+            mof = data.mof[idx]
+            x, y = (data.log_CO2_H2O[idx], data.log_CO2_N2[idx])
+            if subplot==1:
+                if mof in ["UIO-66 2x NC$_4$",  "UIO-66 2x ring-HNC$_5$", "UIO-66 2x alkane-OC$_4$"]:
+                    anno(idx, 'right')
+                elif mof in ["UIO-67", "UIO-66", "UIO-66 4x F", "UIO-66 2x CF$_3$", "UIO-67 8x F", "UIO-67 2x CF$_3$",
+                             "UIO-66 2x branched-HNC$_5$", "UIO-66 2x alkane-HNC$_3$",
+                             "UIO-66 2x alkane-HNC$_4$"]:
+                    anno(idx, 'left')
+
 
     elif plotnum == 1:
         sc1 = ax.scatter(uio66.log_CO2_H2O, uio66.log_CO2_N2, zorder=2, s=10, marker=">", label="UIO-66", c="sienna")
@@ -81,6 +104,11 @@ def ads_selectivity(csv_path, outputpath="ads-selectivity.png", plotnum=0):
         ax.set_xticks([1., 1.5,])
         ax.set_ylim(0.75, 1.6)
         ax.set_yticks([1., 1.5])
+
+        ax.axline([1,1], slope=-1, ls="--", color=".8", zorder=1)
+        ax.annotate("+2", (0.75,1.25), size=5, xytext=(1,7), textcoords='offset points',
+            horizontalalignment="left", verticalalignment='top', fontsize=fsl, c=".5")
+
         uio67_inplot = uio67[uio67.log_CO2_H2O.between(0.75, 1.6) & uio67.log_CO2_N2.between(0.75, 1.6)]
 
         for idx in uio67_inplot.index:
@@ -99,7 +127,7 @@ def ads_selectivity(csv_path, outputpath="ads-selectivity.png", plotnum=0):
                 anno(idx, "right")
 
     ax.legend()
-    fig.savefig(outputpath, dpi=300, bbox_inches='tight', transparent=True)
+    fig.savefig(outputpath, dpi=300, bbox_inches='tight') # , transparent=True
     plt.close(fig)
 
 
