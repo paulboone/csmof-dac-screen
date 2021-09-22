@@ -1,12 +1,9 @@
-from collections import Counter
 from pathlib import Path
 
 import click
-import numpy as np
 
 from mofun import Atoms, replace_pattern_in_structure
-from mofun.rough_uff import pair_params
-from mofun.uff4mof import uff_key_starts_with
+from mofun.rough_uff import assign_pair_coeffs
 
 @click.command()
 @click.argument('structure_path',  type=click.Path())
@@ -14,26 +11,19 @@ from mofun.uff4mof import uff_key_starts_with
 @click.argument('fnlinkers', nargs=-1, type=click.Path())
 @click.option('--output-dir', type=click.Path())
 def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers, output_dir=Path()):
-    linker = Atoms.from_cml(Path(linker_path))
-    structure = Atoms.from_cif(structure_path)
+    linker = Atoms.load(Path(linker_path))
+    structure = Atoms.load(structure_path)
     output_dir = Path(output_dir)
-    assign_pair_params_to_structure(structure)
+    assign_pair_coeffs(structure, assign_atom_type_labels_from_elements=True)
+
     for fnlinker_path in fnlinkers:
         print("reading %s" %fnlinker_path)
-        fnlinker = Atoms.from_lammps_data(open(fnlinker_path,"r"), use_comment_for_type_labels=True)
+        fnlinker = Atoms.load(fnlinker_path)
         try:
             new_structure = replace_pattern_in_structure(structure, linker, fnlinker)
-            with open(output_dir.joinpath(Path(fnlinker_path).stem + ".lmpdat"), "w") as fd:
-                new_structure.to_lammps_data(fd)
+            new_structure.save(output_dir / (Path(fnlinker_path).stem + ".lmpdat"))
         except Exception as e:
             print("ERROR! ", e.args)
-
-def assign_pair_params_to_structure(structure):
-    # NOTE: in UFF, pair params should always be the same for atoms of the same element, regardless of type
-    # DUPLICATE in cif2lmpdat_wcharges.py: should be refactored
-    uff_keys = [uff_key_starts_with(el.ljust(2, "_"))[0] for el in structure.atom_type_elements]
-    structure.pair_params = ['%10.6f %10.6f # %s' % (*pair_params(k), k) for k in uff_keys]
-    structure.atom_type_labels = uff_keys
 
 if __name__ == '__main__':
     functionalize_structure_with_linkers()
