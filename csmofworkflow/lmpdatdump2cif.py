@@ -14,7 +14,7 @@ from mofun import Atoms
 @click.option('--outpath', '-o', type=click.Path())
 @click.option('--framework-element', type=str, help="convert all atoms that are in group 0, the framework group to a specific atom type to make vizualizing the structure easier")
 def lmpdatdump2cif(lmpdatpath, dumppath=None, outpath=None, framework_element=None):
-    atoms = Atoms.from_lammps_data(open(lmpdatpath, "r"), use_comment_for_type_labels=True)
+    atoms = Atoms.load(lmpdatpath)
     if dumppath is not None:
         # update positions in original atoms file with new positions
         dumpatoms = ase.io.read(dumppath, format="lammps-dump-text")

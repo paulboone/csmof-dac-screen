@@ -12,14 +12,14 @@ from mofun import Atoms
 @click.argument('dumppath', type=click.Path())
 @click.argument('outputfile', type=click.File('w'))
 def updatelmpdatpositions(lmpdatpath, dumppath, outputfile):
-    atoms = Atoms.from_lammps_data(open(lmpdatpath, "r"), use_comment_for_type_labels=True)
+    atoms = Atoms.load(lmpdatpath)
 
     # update positions in original atoms file with new positions
     dumpatoms = ase.io.read(dumppath, format="lammps-dump-text")
     assert len(dumpatoms.positions) == len(atoms.positions)
     atoms.positions = dumpatoms.positions
 
-    atoms.to_lammps_data(outputfile)
+    atoms.save(outputfile)
 
 if __name__ == '__main__':
     updatelmpdatpositions()

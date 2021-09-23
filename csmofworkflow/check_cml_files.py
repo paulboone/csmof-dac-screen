@@ -5,7 +5,6 @@ import numpy as np
 from mofun import Atoms
 from mofun.atoms import find_unchanged_atom_pairs
 
-
 def check_cml_files(paths, linker, num_linkers, position_check_indices=[]):
     """ checks if more coordinates were changed in functionalized linker than just the newly added
     functional group atoms

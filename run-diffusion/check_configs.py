@@ -12,8 +12,8 @@ from mofun import Atoms
 @click.argument('gas_lmpdat', type=click.File('r'))
 @click.option('-v', '--verbose', default=False, is_flag=True)
 def check_configs(structure_lmpdat, gas_lmpdat, verbose):
-    atoms = Atoms.from_lammps_data(structure_lmpdat, use_comment_for_type_labels=True)
-    gas_atoms = Atoms.from_lammps_data(gas_lmpdat, use_comment_for_type_labels=True)
+    atoms = Atoms.load(structure_lmpdat, filetype="lmpdat")
+    gas_atoms = Atoms.load(gas_lmpdat, filetype="lmpdat")
     # check for charges
     num_zero_charges = np.count_nonzero(atoms.charges == 0.0)
     if num_zero_charges > 0:

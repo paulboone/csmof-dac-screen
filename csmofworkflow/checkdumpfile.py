@@ -16,7 +16,7 @@ from mofun import Atoms
 @click.option('--warns/--nowarns', default=True)
 @click.option('-v', '--verbose', default=False, is_flag=True)
 def checkdumpfile(lmpdatpath, dumppath, warns=True, verbose=False):
-    atoms = Atoms.from_lammps_data(open(lmpdatpath, "r"), use_comment_for_type_labels=True)
+    atoms = Atoms.load(lmpdatpath)
     dumpatoms = ase.io.read(dumppath, format="lammps-dump-text")
     assert len(dumpatoms.positions) == len(atoms.positions)
     atoms.positions = dumpatoms.positions

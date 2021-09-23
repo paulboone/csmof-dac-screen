@@ -130,7 +130,7 @@ def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_
     gas_name = Path(gas_lmpdat).stem
     structure_name = Path(structure_xyz).stem
 
-    satoms = Atoms.from_lammps_data(structure_lmpdat, use_comment_for_type_labels=True)
+    satoms = Atoms.load(structure_lmpdat, filetype="lmpdat")
 
     output_gas_xyz = "%s_%s_packed.xyz" % (structure_name, gas_name)
     packmol_input = packmol_config(structure_xyz, gas_xyz, output_gas_xyz, num_molecules=num_molecules,
@@ -144,14 +144,14 @@ def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_
     # update the dummy positions in the template gas lmpdat file with real positions from packmol
     # and save in the current directory. Note that this should NOT overwrite the template, since you
     # should be in a different directory at this point.
-    atoms = Atoms.from_lammps_data(open(gas_lmpdat,'r'), use_comment_for_type_labels=True)
+    atoms = Atoms.load(gas_lmpdat)
     atoms.positions = np.array(gas_data[:, 1:], dtype=float)
     atoms.atom_types = np.tile(atoms.atom_types, num_molecules)
     atoms.charges = np.tile(atoms.charges, num_molecules)
     atoms.atom_groups = np.repeat(np.arange(num_molecules), len(gas_data) / num_molecules)
     atoms.cell = satoms.cell
 
-    atoms.to_lammps_data(open("%s.lmpdat" % gas_name, 'w'))
+    atoms.save("%s.lmpdat" % gas_name)
     Path("tmp").mkdir(exist_ok=True)
     Path("packmol.input").rename("tmp/packmol.input")
     Path(output_gas_xyz).rename(Path("tmp/") / output_gas_xyz)

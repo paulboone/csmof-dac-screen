@@ -18,7 +18,7 @@ setup(name='CSMOF-DAC-WORKFLOW',
         'console_scripts': [
             'uff-parameterize-linker = csmofworkflow.uff_parameterize_linker:uff_parameterize_linker',
             'functionalize-structure = csmofworkflow.functionalize_structure:functionalize_structure_with_linkers',
-            'lmpdatdump2cif = csmofworkflow.lmpdatdump2cif:lmpdatdump2cif'
+            'lmpdatdump2cif = csmofworkflow.lmpdatdump2cif:lmpdatdump2cif',
             'checkNVTdumpfile = csmofworkflow.checkdumpfile:checkdumpfile'
         ]
     }

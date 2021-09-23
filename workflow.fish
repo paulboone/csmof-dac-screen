@@ -60,9 +60,9 @@ function run-relax-fngroup-NVT
   #     python3 ./cif2lmpdat_wcharges.py $cif charges/$mof.charges mofs-relaxed-lmpdat/$mof.lmpdat
   # end
 
-  grep "Dangerous builds" */log.lammps > relax-NVT-dangerous-builds.out
-  grep "WARNING" */log.lammps > relax-NVT-warnings.out
-  grep "ERROR" */log.lammps > relax-NVT-errors.out
+  grep "Dangerous builds" */lammps.log > relax-NVT-dangerous-builds.out
+  grep "WARNING" */lammps.log > relax-NVT-warnings.out
+  grep "ERROR" */lammps.log > relax-NVT-errors.out
 
   echo "Please review the *.out files in relax-fngroup-NVT to verify NVT was OK!"
   checkNVTdumpfiles > checkdumps.out
