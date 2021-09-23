@@ -10,7 +10,7 @@ from mofun.uff4mof import UFF4MOF
 from mofun.atoms import find_unchanged_atom_pairs
 import mofun.rough_uff as ruff
 
-def cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path=None, outpath="-"):
+def parameterize_new_atoms(fnlinker_path, linker_path=None, outpath="-"):
     uff_rules = {
         "H": [
             ("H_b", dict(n=2)),
@@ -63,7 +63,7 @@ def cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path=None
 @click.argument('fnlinkers', nargs=-1, type=click.Path())
 @click.option('--linker-path', type=click.Path())
 @click.option('--outpath', '-o', type=click.Path())
-def cml2lmpdat_wparams(fnlinkers, linker_path=None, outpath=Path()):
+def uff_parameterize_linker(fnlinkers, linker_path=None, outpath=Path()):
     outpath = Path(outpath)
     print(outpath)
     for fnlinker_path in fnlinkers:
@@ -71,10 +71,10 @@ def cml2lmpdat_wparams(fnlinkers, linker_path=None, outpath=Path()):
         print("\nreading %s" % fnlinker_path)
         try:
             print(linker_path, fnlinker_path)
-            cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path, outpath.joinpath(fnlinker_path.stem + ".lmpdat"))
+            parameterize_new_atoms(fnlinker_path, linker_path, outpath.joinpath(fnlinker_path.stem + ".lmpdat"))
         except Exception as e:
             print("ERROR! ", e.args)
 
 
 if __name__ == '__main__':
-    cml2lmpdat_wparams()
+    uff_parameterize_linker()
