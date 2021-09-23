@@ -11,7 +11,6 @@ from mofun.atoms import find_unchanged_atom_pairs
 import mofun.rough_uff as ruff
 
 def cml2lmpdat_typed_parameterized_for_new_atoms(fnlinker_path, linker_path=None, outpath="-"):
-
     uff_rules = {
         "H": [
             ("H_b", dict(n=2)),
