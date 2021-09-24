@@ -17,6 +17,6 @@ CutOff                          12.8
 
 Framework                       0
 FrameworkName                   uio66-CF3-2
-InputFileType                   MOL
+InputFileType                   CIF
 
 # ExternalTemperature             298

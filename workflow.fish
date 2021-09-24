@@ -14,13 +14,13 @@ function run-workflow
   mkdir -p linkers-lmpdat
   echo ""
   echo "Parameterizing CML linkers and outputting LMPDAT files..."
-  # uff-parameterize-linker --linker-path=linkers-cml/uio66.cml --outpath=linkers-lmpdat/ linkers-cml/uio66-*.cml
+  uff-parameterize-linker --linker-path=linkers-cml/uio66.cml --outpath=linkers-lmpdat/ linkers-cml/uio66-*.cml
   uff-parameterize-linker --linker-path=linkers-cml/uio67.cml --outpath=linkers-lmpdat/ linkers-cml/uio67-*.cml
 
   mkdir -p mofs-functionalized/
   echo ""
   echo "Functionalizing structure with parameterized linkers..."
-  # functionalize-structure mofs/uio66-P1.cif --output-dir=./mofs-functionalized/ linkers-cml/uio66.cml linkers-lmpdat/uio66-*.lmpdat
+  functionalize-structure mofs/uio66-P1.cif --output-dir=./mofs-functionalized/ linkers-cml/uio66.cml linkers-lmpdat/uio66-*.lmpdat
   functionalize-structure mofs/uio67-P1.cif --output-dir=./mofs-functionalized/ linkers-cml/uio67.cml linkers-lmpdat/uio67-*.lmpdat
 
   echo "replacing H-C-H force constant with one stronger so H-C-H angles don't collapse..."
@@ -85,4 +85,33 @@ function checkNVTdumpfiles
     printf "\n"
     cd ..
   end
+end
+
+
+function run-calculate-charges
+  echo "copy over original non-functionalized MOFS"
+  cp mofs/uio66-P1.cif ./mofs-relaxed-cifs/
+  cp mofs/uio67-P1.cif ./mofs-relaxed-cifs/
+
+  echo "generate RASPA dirs + run EQEQ on each MOF"
+  mkdir -p mofs-relaxed-cifs-w-charges
+  mkdir -p calculate-charges
+  cd calculate-charges
+  for mof in ../mofs-relaxed-cifs/*
+    echo "generating / running $mof"
+    set mofname (basename $mof .cif)
+    echo (date): $mofname
+    mkdir $mofname
+    cp $mof ./$mofname/
+    cp *.def ./$mofname/
+    cp *.input ./$mofname/
+    cd $mofname/
+
+    gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" ./eqeq.input
+    simulate -i eqeq.input
+    cp Movies/System_0/Framework_0_final_1_1_1_P1.cif ../../mofs-relaxed-cifs-w-charges/$mofname.cif
+
+    cd ..
+  end
+  cd ..
 end
