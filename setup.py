@@ -19,7 +19,9 @@ setup(name='CSMOF-DAC-WORKFLOW',
             'uff-parameterize-linker = csmofworkflow.uff_parameterize_linker:uff_parameterize_linker',
             'functionalize-structure = csmofworkflow.functionalize_structure:functionalize_structure_with_linkers',
             'lmpdatdump2cif = csmofworkflow.lmpdatdump2cif:lmpdatdump2cif',
-            'checkNVTdumpfile = csmofworkflow.checkdumpfile:checkdumpfile'
+            'checkNVTdumpfile = csmofworkflow.checkdumpfile:checkdumpfile',
+            'mofun_converter = csmofworkflow.mofun_converter:mofun_converter',
+            'packmol_gaslmpdat = csmofworkflow.packmol_gaslmpdat:packmol_gaslmpdat'
         ]
     }
 )
