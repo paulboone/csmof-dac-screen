@@ -4,9 +4,7 @@ function setup-workflow
   set gitrepo $argv[1]
   echo "Copying necessary files from $gitrepo"
 
-  cp -r $gitrepo/run-functionalize/mofs
-  cp -r $gitrepo/run-functionalize/linkers-cml
-  cp $gitrepo/run-relax-NVT/relax-fngroup-NVT.lammps ./
+  cp -r $gitrepo/workflow-files/* ./
 end
 
 
@@ -116,9 +114,9 @@ function run-calculate-charges
   cd ..
 end
 
-function adsorption-setup
-  mkdir -p adsorption
-  cd adsorption
+function setup-adsorption
+  mkdir -p run-adsorption
+  cd run-adsorption
   for mof in ../mofs-relaxed-cifs-w-charges/*.cif
     set mofname (basename $mof .cif)
     for raspa_input in *.input
@@ -138,7 +136,7 @@ function adsorption-setup
   end
 end
 
-function adsorption-process-data
+function process-adsorption-data
   extract-loadings "uio*_stp/results/Output/System_0/*.data" > loadings_stp.csv
   extract-loadings "uio*_desorb/results/Output/System_0/*.data" > loadings_desorb.csv
 
