@@ -115,3 +115,33 @@ function run-calculate-charges
   end
   cd ..
 end
+
+function adsorption-setup
+  mkdir -p adsorption
+  cd adsorption
+  for mof in ../mofs-relaxed-cifs-w-charges/*.cif
+    set mofname (basename $mof .cif)
+    for raspa_input in *.input
+      set gasprocess (basename $raspa_input .input)
+      set mofprocessdir {$mofname}_{$gasprocess}
+
+      mkdir $mofprocessdir
+      cp $mof $mofprocessdir/
+      cp ./*.def $mofprocessdir/
+      cp $raspa_input $mofprocessdir
+
+      gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/$gasprocess.input
+      if string match "uio67*" $mofname
+        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/$gasprocess.input
+      end
+    end
+  end
+end
+
+function adsorption-process-data
+  extract-loadings "uio*_stp/results/Output/System_0/*.data" > loadings_stp.csv
+  extract-loadings "uio*_desorb/results/Output/System_0/*.data" > loadings_desorb.csv
+
+  extract-henrys "uio*_henrys/results/Output/System_0/*.data" > henrys_stp.csv
+  extract-henrys "uio*_henrys2/results/Output/System_0/*.data" > henrys_desorb.csv
+end
