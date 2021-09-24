@@ -172,6 +172,7 @@ function setup-diffusion
       cd ..
     end
   end
+  cd ..
 end
 
 function check_configs

@@ -148,7 +148,7 @@ def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_
     atoms.positions = np.array(gas_data[:, 1:], dtype=float)
     atoms.atom_types = np.tile(atoms.atom_types, num_molecules)
     atoms.charges = np.tile(atoms.charges, num_molecules)
-    atoms.atom_groups = np.repeat(np.arange(num_molecules), len(gas_data) / num_molecules)
+    atoms.groups = np.repeat(np.arange(num_molecules), len(gas_data) / num_molecules)
     atoms.cell = satoms.cell
 
     atoms.save("%s.lmpdat" % gas_name)
