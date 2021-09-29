@@ -21,7 +21,14 @@ setup(name='CSMOF-DAC-WORKFLOW',
             'lmpdatdump2cif = csmofworkflow.lmpdatdump2cif:lmpdatdump2cif',
             'checkNVTdumpfile = csmofworkflow.checkdumpfile:checkdumpfile',
             'mofun_converter = csmofworkflow.mofun_converter:mofun_converter',
-            'packmol_gaslmpdat = csmofworkflow.packmol_gaslmpdat:packmol_gaslmpdat'
+            'packmol_gaslmpdat = csmofworkflow.packmol_gaslmpdat:packmol_gaslmpdat',
+            'check-config = csmofworkflow.check_config:check_config',
+            'extract-loadings = csmofworkflow.extract_loadings:extract_loadings',
+            'extract-henrys = csmofworkflow.extract_henrys:extract_henrys',
+            'loadings-selectivities = csmofworkflow.loadings_selectivities:loadings_selectivities',
+            'average-temps = csmofworkflow.average_temps:average_temps'
+
+
         ]
     }
 )

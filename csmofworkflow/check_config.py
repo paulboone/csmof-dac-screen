@@ -6,25 +6,24 @@ from scipy.spatial import distance
 
 from mofun import Atoms
 
-
 @click.command()
 @click.argument('structure_lmpdat', type=click.File('r'))
-@click.argument('gas_lmpdat', type=click.File('r'))
-@click.option('-v', '--verbose', default=False, is_flag=True)
-def check_configs(structure_lmpdat, gas_lmpdat, verbose):
+# @click.argument('gas_lmpdat', type=click.File('r'))
+@click.option('-v', '--verbose', default=True, is_flag=True)
+def check_config(structure_lmpdat, gas_lmpdat=None, verbose=True):
     atoms = Atoms.load(structure_lmpdat, filetype="lmpdat")
-    gas_atoms = Atoms.load(gas_lmpdat, filetype="lmpdat")
+    # gas_atoms = Atoms.load(gas_lmpdat, filetype="lmpdat")
     # check for charges
     num_zero_charges = np.count_nonzero(atoms.charges == 0.0)
     if num_zero_charges > 0:
         print("WARNING: %d/%d atoms in structure have 0 charges" % (num_zero_charges, len(atoms.charges)))
 
-    num_zero_charges = np.count_nonzero(gas_atoms.charges == 0.0)
-    if num_zero_charges > 0:
-        print("WARNING: %d/%d atoms in gas have 0 charges" % (num_zero_charges, len(gas_atoms.charges)))
+    # num_zero_charges = np.count_nonzero(gas_atoms.charges == 0.0)
+    # if num_zero_charges > 0:
+    #     print("WARNING: %d/%d atoms in gas have 0 charges" % (num_zero_charges, len(gas_atoms.charges)))
 
     # check for overlapped atom positions
-    atoms.extend(gas_atoms)
+    # atoms.extend(gas_atoms)
     s_ss = distance.cdist(atoms.positions, atoms.positions, "sqeuclidean")
     min_dist_sq = s_ss[np.triu_indices_from(s_ss, k=1)].min()
     min_dist_indices = list(zip(*np.where(s_ss == min_dist_sq)))
@@ -41,4 +40,4 @@ def check_configs(structure_lmpdat, gas_lmpdat, verbose):
 
 
 if __name__ == '__main__':
-    check_configs()
+    check_config()

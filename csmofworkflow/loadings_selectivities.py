@@ -57,6 +57,8 @@ mof_name_mapping = {
     "UIO-67-NC4-2":           'UIO-67 2x NC$_4$',
     "UIO-67-NH2":             'UIO-67 NH$_2$',
     "UIO-67-NH2-2":           'UIO-67 2x NH$_2$',
+    "UIO-67-BPDC":            'UIO-67 BPDC$_2$',
+    "UIO-67-BPDC-2":          'UIO-67 2x BPDC$_2$',
     "UIO-67-OC3-alkane":      'UIO-67 alkane-OC$_3$',
     "UIO-67-OC3-alkane-2":    'UIO-67 2x alkane-OC$_3$',
     "UIO-67-OC4-alkane":      'UIO-67 alkane-OC$_4$',
@@ -106,6 +108,8 @@ mof_order = [
     'UIO-67 2x N$_3$',
     'UIO-67 NH$_2$',
     'UIO-67 2x NH$_2$',
+    'UIO-67 BPDC$_2$',
+    'UIO-67 2x BPDC$_2$',
     'UIO-67 alkane-HNC$_3$',
     'UIO-67 2x alkane-HNC$_3$',
     'UIO-67 alkane-HNC$_4$',
@@ -136,10 +140,10 @@ def loadings_selectivities(loadings_csv, henrys_csv):
     h2o_pa=2050
     co2_pa= 42.18
 
-    henrys = pd.read_csv(henrys_csv, usecols=['mof', 'henrys.2', 'henrys_err.2', 'mol/kg->V/V'])
-    henrys.rename(columns={'henrys.2':'h2o_mol_kg', 'henrys_err.2':'h2o_err_mol_kg'}, inplace=True)
-    henrys["loading_h2o_old"] = henrys["h2o_mol_kg"]*water_pa
-    henrys['loading_h2o'] = henrys["h2o_mol_kg"] * henrys["mol/kg->V/V"] * water_pa
+    henrys = pd.read_csv(henrys_csv, usecols=['mof', 'henrys_mol_kg_pa.2', 'henrys_err.2', 'mol/kg->V/V'])
+    henrys.rename(columns={'henrys_mol_kg_pa.2':'h2o_mol_kg', 'henrys_err.2':'h2o_err_mol_kg'}, inplace=True)
+    henrys["loading_h2o_old"] = henrys["h2o_mol_kg"]*h2o_pa
+    henrys['loading_h2o'] = henrys["h2o_mol_kg"] * henrys["mol/kg->V/V"] * h2o_pa
 
     loadings = pd.read_csv(loadings_csv)
     loadings = loadings.pivot(index="mof", columns="gas", values=["loading", "loading err"])

@@ -30,4 +30,4 @@ run_on_exit(){
 }
 trap run_on_exit EXIT
 
-srun --mpi=pmi2 ~/workspace/lammps_stable/src/lmp_mpi -in co2.lammps -var mofpath uio*.lmpdat -var gaspath ./co2.lmpdat -l lammps.log
+srun --mpi=pmi2 ~/workspace/lammps_stable/src/lmp_mpi -in *.lammps -var mofpath uio*.lmpdat -l lammps.log

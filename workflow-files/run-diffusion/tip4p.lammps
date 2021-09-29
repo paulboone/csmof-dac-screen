@@ -5,7 +5,7 @@
 
 variable simTemp equal 298
 variable dt equal 1.0
-variable randomSeed equal 123123
+variable randomSeed equal 11514
 variable mofAtomTypes equal 4
 
 units           real

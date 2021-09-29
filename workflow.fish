@@ -1,10 +1,11 @@
 
 
 function setup-workflow
-  set gitrepo $argv[1]
-  echo "Copying necessary files from $gitrepo"
+  set gitrepo (realpath $argv[1])
+  set -g CSMOFTMPS $gitrepo/workflow-files
 
-  cp -r $gitrepo/workflow-files/* ./
+  echo "Using gitrepo $gitrepo"
+  echo "Using workflow-files directory $CSMOFTMPS"
 end
 
 
@@ -34,7 +35,6 @@ function run-workflow
   end
 end
 
-
 function run-relax-fngroup-NVT
   mkdir -p mofs-relaxed-cifs
   cd relax-fngroup-NVT
@@ -42,7 +42,7 @@ function run-relax-fngroup-NVT
     echo $mofpath
     set mof (dirname $mofpath)
     cd $mof
-    ~/workspace/lammps/src/lmp_serial -l lammps.log -var lmpdatpath $mof.lmpdat < ../../relax-fngroup-NVT.lammps
+    ~/workspace/lammps/src/lmp_serial -l lammps.log -var lmpdatpath $mof.lmpdat < $CSMOFTMPS/relax-fngroup-NVT/relax-fngroup-NVT.lammps
     lmpdatdump2cif $mof.lmpdat --dumppath=nvt-preeq.dump.20000.custom --outpath=../../mofs-relaxed-cifs/$mof.cif
     cd ..
   end
@@ -68,7 +68,6 @@ function run-relax-fngroup-NVT
   cd ..
 end
 
-
 function checkNVTdumpfiles
   for mofpath in */
     set mof (basename $mofpath)
@@ -85,7 +84,6 @@ function checkNVTdumpfiles
   end
 end
 
-
 function run-calculate-charges
   echo "copy over original non-functionalized MOFS"
   cp mofs/uio66-P1.cif ./mofs-relaxed-cifs/
@@ -101,8 +99,8 @@ function run-calculate-charges
     echo (date): $mofname
     mkdir $mofname
     cp $mof ./$mofname/
-    cp *.def ./$mofname/
-    cp *.input ./$mofname/
+    cp $CSMOFTMPS/calculate-charges/*.def ./$mofname/
+    cp $CSMOFTMPS/calculate-charges/*.input ./$mofname/
     cd $mofname/
 
     gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" ./eqeq.input
@@ -119,13 +117,13 @@ function setup-adsorption
   cd run-adsorption
   for mof in ../mofs-relaxed-cifs-w-charges/*.cif
     set mofname (basename $mof .cif)
-    for raspa_input in *.input
+    for raspa_input in $CSMOFTMPS/run-adsorption/*.input
       set gasprocess (basename $raspa_input .input)
       set mofprocessdir {$mofname}_{$gasprocess}
 
       mkdir $mofprocessdir
       cp $mof $mofprocessdir/
-      cp ./*.def $mofprocessdir/
+      cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
       cp $raspa_input $mofprocessdir
 
       gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/$gasprocess.input
@@ -134,6 +132,7 @@ function setup-adsorption
       end
     end
   end
+  cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
   cd ..
   echo "Finished. The dirs in run-adsorption should be run on H2P using the provided .slurm file."
 end
@@ -153,7 +152,7 @@ function setup-diffusion
   for mof in ../mofs-relaxed-cifs-w-charges/*.cif
     set mofname (basename $mof .cif)
 
-    for gas in *.lammps
+    for gas in $CSMOFTMPS/run-diffusion/*.lammps
       set gasname (basename $gas .lammps)
       set mofgasdir $mofname-$gasname
       mkdir $mofgasdir
@@ -161,8 +160,8 @@ function setup-diffusion
       cd $mofgasdir/
       mofun_converter --mic 12.8 --pp ../$mof $mofname.lmpdat
       mofun_converter $mofname.lmpdat $mofname.xyz
-      packmol_gaslmpdat -n 10 {$mofname}.lmpdat {$mofname}.xyz ../$gasname.lmpdat ../$gasname.xyz
-      cp ../$gas ./
+      packmol_gaslmpdat -n 10 {$mofname}.lmpdat {$mofname}.xyz $CSMOFTMPS/run-diffusion/$gasname.lmpdat $CSMOFTMPS/run-diffusion/$gasname.xyz
+      cp $gas ./
 
       set randomseed (random)
       gsed -i "s/variable randomSeed equal.*/variable randomSeed equal $randomseed/g" $gas
@@ -173,17 +172,18 @@ function setup-diffusion
       cd ..
     end
   end
+  cp $CSMOFTMPS/run-diffusion/lammps.slurm ./
   cd ..
   echo "Finished. The dirs in run-diffusion should be run on H2P using the provided .slurm file."
 end
 
-function check_configs
+function check-configs
   for sim in uio*
     cd $sim
     set -l structure uio*.lmpdat
     set -l gas (ls | grep -v "^uio*" | grep ".*lmpdat")
     echo $structure $gas
-    python3 ../../run-diffusion/check_configs.py $structure $gas
+    check-config $structure $gas
     cd ..
   end
 end
@@ -217,7 +217,7 @@ function _converttrj
     if not test -f nvt.tsv
       lmp_log_to_tsv.py ./output/lammps.log -i 4 > nvt.tsv
     end
-    python3 ../../../csmof-dac-screening/run-diffusion/average_temps.py -r $sim >> ../temps.csv
+    average-temps -r $sim >> ../temps.csv
     cd ..
   end
 end
@@ -240,8 +240,71 @@ function process-diffusion-data
 
   for sim in uio*
     cd $sim
-    python3 ../../../csmof-dac-screening/run-diffusion/average_temps.py -r $sim >> ../temps.csv
+    average-temps -r $sim >> ../temps.csv
     cd ..
   end
 end
   # functions -e _converttrj
+
+function setup-raspa-isotherm-dirs
+  set mofs $argv
+  set pressures  50 100 500 1000 5000 10000 50000 101325
+  mkdir -p run-isotherms
+  cd run-isotherms
+
+  # make independent configs
+  for mofpath in $mofs
+
+    cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
+    echo "mofpath: $mofpath"
+    set mof (basename $mofpath .cif)
+    echo "mof: $mof"
+    mkdir -p $mof
+    cd $mof
+
+    # CO2
+    for p in $pressures
+      mkdir -p CO2-$p
+      cd CO2-$p
+      cp ../../../$mofpath ./$mof.cif
+      cp $CSMOFTMPS/run-adsorption/co2_stp.input ./co2.input
+      cp $CSMOFTMPS/run-adsorption/force_field.def ./
+      cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
+      cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
+      gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./co2.input
+      gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./co2.input
+      cd ..
+    end
+
+    # N2
+    for p in $pressures
+      mkdir -p N2-$p
+      cd N2-$p
+      cp ../../../$mofpath ./$mof.cif
+      cp $CSMOFTMPS/run-adsorption/n2_stp.input ./n2.input
+      cp $CSMOFTMPS/run-adsorption/force_field.def ./
+      cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
+      cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
+      gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./n2.input
+      gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./n2.input
+      cd ..
+    end
+
+    # N2 @ 77K for surface area
+    for p in $pressures
+      mkdir -p N2-77K-$p
+      cd N2-77K-$p
+      cp ../../../$mofpath ./$mof.cif
+      cp $CSMOFTMPS/run-adsorption/n2_stp.input ./n2.input
+      cp $CSMOFTMPS/run-adsorption/force_field.def ./
+      cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
+      cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
+      gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./n2.input
+      gsed -i -e "s|^ExternalTemperature.*|ExternalTemperature  77|" ./n2.input
+      gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./n2.input
+      cd ..
+    end
+    cd ..
+  end
+  cd ..
+end
