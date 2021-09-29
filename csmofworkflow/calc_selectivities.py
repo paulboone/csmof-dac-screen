@@ -5,6 +5,7 @@ import sys
 
 import click
 
+import numpy as np
 import pandas as pd
 
 
@@ -57,8 +58,8 @@ mof_name_mapping = {
     "UIO-67-NC4-2":           'UIO-67 2x NC$_4$',
     "UIO-67-NH2":             'UIO-67 NH$_2$',
     "UIO-67-NH2-2":           'UIO-67 2x NH$_2$',
-    "UIO-67-BPDC":            'UIO-67 BPDC$_2$',
-    "UIO-67-BPDC-2":          'UIO-67 2x BPDC$_2$',
+    "UIO-67-CH3":             'UIO-67 CH$_3$',
+    "UIO-67-CH3-2":           'UIO-67 2x CH$_3$',
     "UIO-67-OC3-alkane":      'UIO-67 alkane-OC$_3$',
     "UIO-67-OC3-alkane-2":    'UIO-67 2x alkane-OC$_3$',
     "UIO-67-OC4-alkane":      'UIO-67 alkane-OC$_4$',
@@ -108,8 +109,8 @@ mof_order = [
     'UIO-67 2x N$_3$',
     'UIO-67 NH$_2$',
     'UIO-67 2x NH$_2$',
-    'UIO-67 BPDC$_2$',
-    'UIO-67 2x BPDC$_2$',
+    'UIO-67 CH$_3$',
+    'UIO-67 2x CH$_3$',
     'UIO-67 alkane-HNC$_3$',
     'UIO-67 2x alkane-HNC$_3$',
     'UIO-67 alkane-HNC$_4$',
@@ -134,7 +135,7 @@ mof_order = [
 @click.command()
 @click.argument('loadings_csv', type=click.Path())
 @click.argument('henrys_csv', type=click.Path())
-def loadings_selectivities(loadings_csv, henrys_csv):
+def loadings2selectivities(loadings_csv, henrys_csv):
 
     n2_pa=79033.50
     h2o_pa=2050
@@ -157,6 +158,25 @@ def loadings_selectivities(loadings_csv, henrys_csv):
 
     data.set_index('mof').reindex(mof_order).to_csv("loadings_all.csv")
 
+@click.command()
+@click.argument('diff_csv', type=click.Path())
+def diffusivities2selectivities(diff_csv):
+    diffs = pd.read_csv(diff_csv, usecols=["mof", "gas", "D(FIT)", "MSD"], skipinitialspace=True)
+    diffs.rename(columns={'D(FIT)':'diff', 'MSD':'msd'}, inplace=True)
+    diffs.loc[diffs["msd"] < 200, 'diff'] = 0.
+    diffs.drop("msd", axis='columns', inplace=True)
 
-if __name__ == '__main__':
-    loadings_selectivities()
+    diffs = diffs.pivot(index="mof", columns="gas", values=["diff"])
+    diffs.reset_index(level=0, inplace=True) # convert mof to column
+    diffs.columns = ["_".join(a) for a in diffs.columns.to_flat_index()]
+    diffs.rename(columns={'mof_':'mof', "diff_co2": "CO2", "diff_n2": "N2", "diff_tip4p": "H2O"}, inplace=True)
+
+    diffs["CO2/N2"] = diffs['CO2'] / diffs['N2']
+    diffs["CO2/H2O"] = diffs['CO2'] / diffs['H2O']
+    diffs['mof'] = diffs['mof'].str.replace("uio6", "UIO-6")
+    diffs['mof'] = diffs['mof'].map(mof_name_mapping)
+
+    diffs.replace(np.inf, 1000., inplace=True)
+    diffs.replace(np.nan, 0., inplace=True)
+
+    diffs.set_index('mof').reindex(mof_order).to_csv("diff_summ.csv", float_format='%.2e')

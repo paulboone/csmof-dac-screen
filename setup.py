@@ -25,10 +25,9 @@ setup(name='CSMOF-DAC-WORKFLOW',
             'check-config = csmofworkflow.check_config:check_config',
             'extract-loadings = csmofworkflow.extract_loadings:extract_loadings',
             'extract-henrys = csmofworkflow.extract_henrys:extract_henrys',
-            'loadings-selectivities = csmofworkflow.loadings_selectivities:loadings_selectivities',
+            'loadings2selectivities = csmofworkflow.calc_selectivities:loadings2selectivities',
+            'diffusivities2selectivities = csmofworkflow.calc_selectivities:diffusivities2selectivities',
             'average-temps = csmofworkflow.average_temps:average_temps'
-
-
         ]
     }
 )

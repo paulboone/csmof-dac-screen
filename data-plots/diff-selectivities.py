@@ -19,8 +19,8 @@ def d_selectivity(csv_path, outputpath="diff-selectivity.png", plotnum=0):
     fig = plt.figure(figsize=(7., 7.))
 
     data = pd.read_csv(csv_path)
-    data["log_CO2_H2O"] = np.log10(data["CO2 / H2O"])
-    data["log_CO2_N2"] = np.log10(data["CO2 / N2"])
+    data["log_CO2_H2O"] = np.log10(data["CO2/H2O"])
+    data["log_CO2_N2"] = np.log10(data["CO2/N2"])
     uio66 = data[data.mof.str.startswith("UIO-66")]
     uio67 = data[data.mof.str.startswith("UIO-67")]
     moflabels = list(data.mof.str.replace("UIO-6[67] ", ""))

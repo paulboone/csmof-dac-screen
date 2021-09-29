@@ -217,9 +217,15 @@ function _converttrj
     if not test -f nvt.tsv
       lmp_log_to_tsv.py ./output/lammps.log -i 4 > nvt.tsv
     end
-    average-temps -r $sim >> ../temps.csv
     cd ..
   end
+end
+
+function _cleantrj
+  rm */gastrj.npy
+  rm */diffusivity.out
+  rm */nvt-eq.tsv
+  rm */nvt.tsv
 end
 
 function process-diffusion-data
@@ -240,6 +246,7 @@ function process-diffusion-data
 
   for sim in uio*
     cd $sim
+    echo $sim
     average-temps -r $sim >> ../temps.csv
     cd ..
   end
