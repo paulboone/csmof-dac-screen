@@ -1,5 +1,4 @@
 
-
 function setup-workflow
   set gitrepo (realpath $argv[1])
   set -g CSMOFTMPS $gitrepo/workflow-files
@@ -261,7 +260,6 @@ function setup-raspa-isotherm-dirs
 
   # make independent configs
   for mofpath in $mofs
-
     cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
     echo "mofpath: $mofpath"
     set mof (basename $mofpath .cif)
@@ -278,6 +276,9 @@ function setup-raspa-isotherm-dirs
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
       cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
       cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
+      if string match "uio67*" $mof
+        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" ./co2.input
+      end
       gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./co2.input
       gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./co2.input
       cd ..
@@ -292,6 +293,9 @@ function setup-raspa-isotherm-dirs
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
       cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
       cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
+      if string match "uio67*" $mof
+        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" ./n2.input
+      end
       gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./n2.input
       gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./n2.input
       cd ..
@@ -306,6 +310,9 @@ function setup-raspa-isotherm-dirs
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
       cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
       cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
+      if string match "uio67*" $mof
+        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" ./n2.input
+      end
       gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./n2.input
       gsed -i -e "s|^ExternalTemperature.*|ExternalTemperature  77|" ./n2.input
       gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./n2.input
@@ -314,4 +321,19 @@ function setup-raspa-isotherm-dirs
     cd ..
   end
   cd ..
+end
+
+function process-isotherm-data
+  for d in uio*/
+    set mof (basename $d)
+    echo "$mof/*/results/Output/System_0/*.data"
+    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2-*/results/Output/System_0/*.data" > {$mof}_N2.csv
+    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2@77K-*/results/Output/System_0/*.data" > {$mof}_N2@77K.csv
+    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/CO2*/results/Output/System_0/*.data" > {$mof}_CO2.csv
+  end
+  mkdir -p isotherms
+  cd isotherms
+  for x in ../*.csv
+    sim2expisothermcsv $x
+  end
 end
