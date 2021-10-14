@@ -15,6 +15,7 @@ Framework                       0
 FrameworkName                   uio66-CF3-2
 InputFileType                   cif
 UnitCells                       2 2 2
+HeliumVoidFraction              1.0
 
 ExternalTemperature             298
 ExternalPressure                 42.18

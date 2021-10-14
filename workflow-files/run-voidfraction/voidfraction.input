@@ -1,6 +1,6 @@
 SimulationType                  MonteCarlo
 NumberOfCycles                  50000
-NumberOfInitializationCycles    1000
+NumberOfInitializationCycles    5000
 PrintEvery                      1000
 RestartFile                     no
 Movies                          yes
@@ -15,20 +15,10 @@ Framework                       0
 FrameworkName                   uio66-CF3-2
 InputFileType                   cif
 UnitCells                       2 2 2
-HeliumVoidFraction              1.0
 
 ExternalTemperature             298
-ExternalPressure              79033.5
-# 1 atm in pascals * %N2: 101325 * 0.78
 
-Component 0 MoleculeName              N2
+Component 0 MoleculeName              helium
             MoleculeDefinition        TraPPE
-            IdealGasRosenbluthWeight  1.00001
-            MolFraction                 1.0
-            FugacityCoefficient         1.0
-
-            SwapProbability             1.0
-            TranslationProbability      0.5
-            RotationProbability         0.5
-
+            WidomProbability            1.0
             CreateNumberOfMolecules     0

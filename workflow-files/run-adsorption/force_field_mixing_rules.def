@@ -3,7 +3,7 @@ shifted
 # general rule tailcorrections
 no
 # number of defined interactions
-13
+14
 # Framework params from UFF; H2O from TIP4P-Ew; CO2 and N2 params from TraPPE
 H_             lennard-jones    22.14344779	 2.5711
 C_             lennard-jones    52.84231859	 3.4309
@@ -18,5 +18,6 @@ O_co2          lennard-jones    79.0      3.05
 C_co2          lennard-jones    27.0      2.80
 N_n2           lennard-jones    36.0      3.31
 N_com   none
+He             lennard-jones    10.9      2.64
 # general mixing rule for Lennard-Jones
 Lorentz-Berthelot

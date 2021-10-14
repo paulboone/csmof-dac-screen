@@ -112,7 +112,37 @@ function run-calculate-charges
   cd ..
 end
 
+function setup-voidfraction
+  mkdir -p run-voidfraction
+  cd run-voidfraction
+  for mof in ../mofs-relaxed-cifs-w-charges/*.cif
+    set mofname (basename $mof .cif)
+
+    set mofprocessdir {$mofname}
+    mkdir $mofprocessdir
+    cp $mof $mofprocessdir/
+    cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
+    cp $CSMOFTMPS/run-voidfraction/voidfraction.input $mofprocessdir
+    gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/voidfraction.input
+    if string match "uio67*" $mofname
+      gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/voidfraction.input
+    end
+  end
+  cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
+  cd ..
+  echo "Finished. The dirs in run-voidfraction should be run on H2P using the provided .slurm file."
+end
+
+function process-voidfraction
+  echo "mof, voidfraction, voidfraction_error" > voidfraction.csv
+  for mof in */
+    set widomline (string split -n " " (grep "Average Widom Rosenbluth-weight:" results/Output/System_0/*.data))
+    echo "$mof, $widomline[5], $widomline[7]" >> voidfraction.csv
+  end
+end
+
 function setup-adsorption
+
   mkdir -p run-adsorption
   cd run-adsorption
   for mof in ../mofs-relaxed-cifs-w-charges/*.cif
@@ -127,6 +157,7 @@ function setup-adsorption
       cp $raspa_input $mofprocessdir
 
       gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/$gasprocess.input
+      gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $mofname/g" $mofprocessdir/$gasprocess.input
       if string match "uio67*" $mofname
         gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/$gasprocess.input
       end

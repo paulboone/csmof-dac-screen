@@ -16,6 +16,7 @@ FrameworkName                   uio66-CF3-2
 InputFileType                   cif
 UnitCells                       2 2 2
 ExternalTemperature             373.15
+HeliumVoidFraction              1.0
 
 Component 0 MoleculeName              CO2
             MoleculeDefinition        TraPPE
