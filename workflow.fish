@@ -7,6 +7,7 @@ function setup-workflow
   echo "Using workflow-files directory $CSMOFTMPS"
 end
 
+setup-workflow (dirname (status --current-filename))
 
 function run-workflow
   mkdir -p linkers-lmpdat
