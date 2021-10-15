@@ -3,7 +3,7 @@ NumberOfCycles                  50000
 NumberOfInitializationCycles    1000
 PrintEvery                      1000
 RestartFile                     no
-Movies                          yes
+Movies                          no
 WriteMoviesEvery                100
 
 Forcefield                      Local
@@ -15,6 +15,8 @@ Framework                       0
 FrameworkName                   uio66-CF3-2
 InputFileType                   cif
 UnitCells                       2 2 2
+HeliumVoidFraction              1.0
+
 
 ExternalTemperature             373.15
 ExternalPressure                  0.62445

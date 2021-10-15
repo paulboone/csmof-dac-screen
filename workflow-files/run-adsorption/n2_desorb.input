@@ -3,7 +3,7 @@ NumberOfCycles                  50000
 NumberOfInitializationCycles    1000
 PrintEvery                      1000
 RestartFile                     no
-Movies                          yes
+Movies                          no
 WriteMoviesEvery                100
 
 Forcefield                      Local
