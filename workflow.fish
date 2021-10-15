@@ -9,7 +9,7 @@ end
 
 setup-workflow (dirname (status --current-filename))
 
-function run-workflow
+function setup-structures
   mkdir -p linkers-lmpdat
   echo ""
   echo "Parameterizing CML linkers and outputting LMPDAT files..."
@@ -19,8 +19,8 @@ function run-workflow
   mkdir -p mofs-functionalized/
   echo ""
   echo "Functionalizing structure with parameterized linkers..."
-  functionalize-structure mofs/uio66-P1.cif --output-dir=./mofs-functionalized/ linkers-cml/uio66.cml linkers-lmpdat/uio66-*.lmpdat
-  functionalize-structure mofs/uio67-P1.cif --output-dir=./mofs-functionalized/ linkers-cml/uio67.cml linkers-lmpdat/uio67-*.lmpdat
+  functionalize-structure mofs/uio66.cif --expected-num=24 --output-dir=./mofs-functionalized/ linkers-cml/uio66.cml linkers-lmpdat/uio66-*.lmpdat
+  functionalize-structure mofs/uio67.cif --expected-num=24 --output-dir=./mofs-functionalized/ linkers-cml/uio67.cml linkers-lmpdat/uio67-*.lmpdat
 
   echo "replacing H-C-H force constant with one stronger so H-C-H angles don't collapse..."
   gsed -i 's/fourier  75.498766  0.343737  0.374972  0.281246   # H_ C_3 H_/fourier  200.0  0.343737  0.374972  0.281246   # H_ C_3 H_/g' mofs-functionalized/*.lmpdat
@@ -33,6 +33,7 @@ function run-workflow
     mkdir $mofdir
     cp $mof $mofdir/
   end
+  echo "Please run NVT sims using `run-relax-fngroup-NVT`"
 end
 
 function run-relax-fngroup-NVT
@@ -86,8 +87,8 @@ end
 
 function run-calculate-charges
   echo "copy over original non-functionalized MOFS"
-  cp mofs/uio66-P1.cif ./mofs-relaxed-cifs/
-  cp mofs/uio67-P1.cif ./mofs-relaxed-cifs/
+  cp mofs/uio66.cif ./mofs-relaxed-cifs/
+  cp mofs/uio67.cif ./mofs-relaxed-cifs/
 
   echo "generate RASPA dirs + run EQEQ on each MOF"
   mkdir -p mofs-relaxed-cifs-w-charges
@@ -142,7 +143,6 @@ function process-voidfraction
 end
 
 function setup-adsorption
-
   mkdir -p run-adsorption
   cd run-adsorption
   for mof in ../mofs-relaxed-cifs-w-charges/*.cif
