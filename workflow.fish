@@ -154,7 +154,7 @@ function setup-surfacearea
     cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
     cp $CSMOFTMPS/run-surfacearea/surfacearea.input $mofprocessdir
 
-    set vfline (string split , (grep uio66, henrys_stp.csv))
+    set vfline (string split , (grep $mof, run-voidfraction/voidfraction.csv))
     gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/surfacearea.input
     gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $vfline[1]/g" $mofprocessdir/surfacearea.input
     if string match "uio67*" $mofname
@@ -188,8 +188,9 @@ function setup-adsorption
       cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
       cp $raspa_input $mofprocessdir
 
+      set vfline (string split , (grep $mof, run-voidfraction/voidfraction.csv))
       gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/$gasprocess.input
-      gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $mofname/g" $mofprocessdir/$gasprocess.input
+      gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $vfline[1]/g" $mofprocessdir/$gasprocess.input
       if string match "uio67*" $mofname
         gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/$gasprocess.input
       end
