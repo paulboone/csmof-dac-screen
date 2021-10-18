@@ -1,0 +1,26 @@
+SimulationType                  MonteCarlo
+NumberOfCycles                  50000
+NumberOfInitializationCycles    5000
+PrintEvery                      1000
+RestartFile                     no
+Movies                          no
+WriteMoviesEvery                100
+
+Forcefield                      Local
+UseChargesFromCIFFile           yes
+ChargeMethod                    Ewald
+CutOff                          12.8
+
+Framework                       0
+FrameworkName                   uio66-CF3-2
+InputFileType                   cif
+UnitCells                       2 2 2
+HeliumVoidFraction              1.0
+SurfaceAreaProbeDistance        Sigma
+
+ExternalTemperature             298
+
+Component 0 MoleculeName             N2
+            MoleculeDefinition       TraPPE
+            SurfaceAreaProbability   1.0
+            CreateNumberOfMolecules  0

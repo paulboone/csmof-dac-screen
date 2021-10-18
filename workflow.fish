@@ -142,6 +142,38 @@ function process-voidfraction
   end
 end
 
+function setup-surfacearea
+  mkdir -p run-surfacearea
+  cd run-surfacearea
+  for mof in ../mofs-relaxed-cifs-w-charges/*.cif
+    set mofname (basename $mof .cif)
+
+    set mofprocessdir {$mofname}
+    mkdir $mofprocessdir
+    cp $mof $mofprocessdir/
+    cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
+    cp $CSMOFTMPS/run-surfacearea/surfacearea.input $mofprocessdir
+
+    set vfline (string split , (grep uio66, henrys_stp.csv))
+    gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/surfacearea.input
+    gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $vfline[1]/g" $mofprocessdir/surfacearea.input
+    if string match "uio67*" $mofname
+      gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/surfacearea.input
+    end
+  end
+  cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
+  cd ..
+  echo "Finished. The dirs in run-voidfraction should be run on H2P using the provided .slurm file."
+end
+
+function process-surfacearea
+  echo "mof, surfacearea, surfacearea_error" > surfacearea.csv
+  for mof in */
+    set widomline (string split -n " " (grep "Average Widom Rosenbluth-weight:" results/Output/System_0/*.data))
+    echo "$mof, $widomline[5], $widomline[7]" >> surfacearea.csv
+  end
+end
+
 function setup-adsorption
   mkdir -p run-adsorption
   cd run-adsorption
