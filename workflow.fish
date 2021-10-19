@@ -175,14 +175,16 @@ function setup-surfacearea
   end
   cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
   cd ..
-  echo "Finished. The dirs in run-voidfraction should be run on H2P using the provided .slurm file."
+  echo "Finished. The dirs in run-surfacearea should be run on H2P using the provided .slurm file."
 end
 
 function process-surfacearea
   echo "mof, surfacearea, surfacearea_error" > surfacearea.csv
   for mof in */
-    set widomline (string split -n " " (grep "Average Widom Rosenbluth-weight:" results/Output/System_0/*.data))
-    echo "$mof, $widomline[5], $widomline[7]" >> surfacearea.csv
+    set mofname (basename $mof)
+    echo $mofname
+    set widomline (string split -n " " (grep "Surface area: .* \[m^2/g\]" $mofname/results/Output/System_0/*.data))
+    echo "$mofname, $widomline[3], $widomline[5]" >> surfacearea.csv
   end
 end
 
