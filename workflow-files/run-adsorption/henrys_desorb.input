@@ -14,6 +14,7 @@ CutOff                          12.8
 Framework                       0
 FrameworkName                   uio66-CF3-2
 InputFileType                   cif
+RemoveAtomNumberCodeFromLabel   yes
 UnitCells                       2 2 2
 ExternalTemperature             373.15
 HeliumVoidFraction              1.0

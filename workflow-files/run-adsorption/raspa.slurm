@@ -3,7 +3,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cluster=smp
 #SBATCH --time=3-0
-#SBATCH --qos=long
+#SBATCH --qos=normal
 #SBATCH --job-name=raspa
 #SBATCH --output=raspajob.log
 
