@@ -90,6 +90,27 @@ function checkNVTdumpfiles
   end
 end
 
+function modify-raspa-input
+  set mofname $argv[1]
+  set inputfile $argv[2]
+  set vffile $argv[3]
+
+  gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $inputfile
+
+  if string match "uio67*" $mofname
+    gsed -ni "s/UnitCells.*/UnitCells 1 1 1/g" $inputfile
+  end
+
+  if test -n "$vffile"
+    set vfline (string split , (grep $mofname, $vffile))
+    if test -z "$vfline"
+      echo "ERROR: no void fraction match found for $mofname"
+    else
+      gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $vfline[2]/g" $inputfile
+    end
+  end
+end
+
 function setup-calculate-charges
   echo "generate RASPA dirs + run EQEQ on each MOF"
   mkdir -p run-calculate-charges
@@ -134,10 +155,8 @@ function setup-voidfraction
     cp $mof $mofprocessdir/
     cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
     cp $CSMOFTMPS/run-voidfraction/voidfraction.input $mofprocessdir
-    gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/voidfraction.input
-    if string match "uio67*" $mofname
-      gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/voidfraction.input
-    end
+
+    modify-raspa-input $mofname $mofprocessdir/voidfraction.input
   end
   cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
   cd ..
@@ -166,12 +185,7 @@ function setup-surfacearea
     cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
     cp $CSMOFTMPS/run-surfacearea/surfacearea.input $mofprocessdir
 
-    set vfline (string split , (grep $mof, run-voidfraction/voidfraction.csv))
-    gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/surfacearea.input
-    gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $vfline[1]/g" $mofprocessdir/surfacearea.input
-    if string match "uio67*" $mofname
-      gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/surfacearea.input
-    end
+    modify-raspa-input $mofname $mofprocessdir/surfacearea.input ../run-voidfraction/voidfraction.csv
   end
   cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
   cd ..
@@ -202,12 +216,7 @@ function setup-adsorption
       cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
       cp $raspa_input $mofprocessdir
 
-      set vfline (string split , (grep $mof, run-voidfraction/voidfraction.csv))
-      gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $mofprocessdir/$gasprocess.input
-      gsed -i "s/HeliumVoidFraction.*/HeliumVoidFraction $vfline[1]/g" $mofprocessdir/$gasprocess.input
-      if string match "uio67*" $mofname
-        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $mofprocessdir/$gasprocess.input
-      end
+      modify-raspa-input $mofname $raspa_input ../run-voidfraction/voidfraction.csv
     end
   end
   cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
@@ -355,10 +364,8 @@ function setup-raspa-isotherm-dirs
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
       cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
       cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
-      if string match "uio67*" $mof
-        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" ./co2.input
-      end
-      gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./co2.input
+
+      modify-raspa-input $mof ./co2.input ../../../run-voidfraction/voidfraction.csv
       gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./co2.input
       cd ..
     end
@@ -372,10 +379,7 @@ function setup-raspa-isotherm-dirs
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
       cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
       cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
-      if string match "uio67*" $mof
-        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" ./n2.input
-      end
-      gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./n2.input
+      modify-raspa-input $mof ./n2.input ../../../run-voidfraction/voidfraction.csv
       gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./n2.input
       cd ..
     end
@@ -389,10 +393,7 @@ function setup-raspa-isotherm-dirs
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
       cp $CSMOFTMPS/run-adsorption/force_field_mixing_rules.def ./
       cp $CSMOFTMPS/run-adsorption/pseudo_atoms.def ./
-      if string match "uio67*" $mof
-        gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" ./n2.input
-      end
-      gsed -i "s/FrameworkName.*/FrameworkName $mof/g" ./n2.input
+      modify-raspa-input $mof ./n2.input ../../../run-voidfraction/voidfraction.csv
       gsed -i -e "s|^ExternalTemperature.*|ExternalTemperature  77|" ./n2.input
       gsed -i -e "s|^ExternalPressure.*|ExternalPressure     $p|" ./n2.input
       cd ..
