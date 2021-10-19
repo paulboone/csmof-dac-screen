@@ -97,8 +97,8 @@ function modify-raspa-input
 
   gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" $inputfile
 
-  if string match "uio67*" $mofname
-    gsed -ni "s/UnitCells.*/UnitCells 1 1 1/g" $inputfile
+  if string match --quiet "uio67*" $mofname
+    gsed -i "s/UnitCells.*/UnitCells 1 1 1/g" $inputfile
   end
 
   if test -n "$vffile"
