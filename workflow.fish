@@ -63,6 +63,11 @@ function run-relax-fngroup-NVT
   grep "WARNING" */lammps.log > relax-NVT-warnings.out
   grep "ERROR" */lammps.log > relax-NVT-errors.out
 
+  echo "copy over original non-functionalized MOFS"
+  # need to use converter to convert from cartesian to fractional coordinates
+  lmpdatdump2cif ../mofs/uio66.cif -o ../mofs-relaxed-cifs/uio66.cif
+  lmpdatdump2cif ../mofs/uio67.cif -o ../mofs-relaxed-cifs/uio67.cif
+
   echo "Please review the *.out files in relax-fngroup-NVT to verify NVT was OK!"
   checkNVTdumpfiles > checkdumps.out
 
@@ -85,30 +90,35 @@ function checkNVTdumpfiles
   end
 end
 
-function run-calculate-charges
-  echo "copy over original non-functionalized MOFS"
-  cp mofs/uio66.cif ./mofs-relaxed-cifs/
-  cp mofs/uio67.cif ./mofs-relaxed-cifs/
-
+function setup-calculate-charges
   echo "generate RASPA dirs + run EQEQ on each MOF"
-  mkdir -p mofs-relaxed-cifs-w-charges
-  mkdir -p calculate-charges
-  cd calculate-charges
+  mkdir -p run-calculate-charges
+  cd run-calculate-charges
   for mof in ../mofs-relaxed-cifs/*
-    echo "generating / running $mof"
+    echo "$mof"
     set mofname (basename $mof .cif)
-    echo (date): $mofname
     mkdir $mofname
     cp $mof ./$mofname/
-    cp $CSMOFTMPS/calculate-charges/*.def ./$mofname/
-    cp $CSMOFTMPS/calculate-charges/*.input ./$mofname/
+    cp $CSMOFTMPS/run-calculate-charges/*.def ./$mofname/
+    cp $CSMOFTMPS/run-calculate-charges/*.input ./$mofname/
     cd $mofname/
 
     gsed -i "s/FrameworkName.*/FrameworkName $mofname/g" ./eqeq.input
-    simulate -i eqeq.input
-    cp Movies/System_0/Framework_0_final_1_1_1_P1.cif ../../mofs-relaxed-cifs-w-charges/$mofname.cif
+    # simulate -i eqeq.input
 
     cd ..
+  end
+  cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
+  cd ..
+end
+
+function process-calculate-charges
+  mkdir -p mofs-relaxed-cifs-w-charges
+  cd run-calculate-charges
+  for mof in ../mofs-relaxed-cifs/*
+    set mofname (basename $mof .cif)
+    echo $mofname
+    cp $mofname/results/Movies/System_0/Framework_0_final_1_1_1_P1.cif ../mofs-relaxed-cifs-w-charges/$mofname.cif
   end
   cd ..
 end
