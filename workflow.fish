@@ -149,8 +149,8 @@ function setup-voidfraction
   cd run-voidfraction
   for mof in ../mofs-relaxed-cifs-w-charges/*.cif
     set mofname (basename $mof .cif)
-
     set mofprocessdir {$mofname}
+    echo $mofname
     mkdir $mofprocessdir
     cp $mof $mofprocessdir/
     cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
@@ -342,7 +342,7 @@ end
 
 function setup-raspa-isotherm-dirs
   set mofs $argv
-  set pressures  50 100 500 1000 5000 10000 50000 101325
+  set pressures  10 25 40 50 100 500 1000 5000 10000 50000 101325
   mkdir -p run-isotherms
   cd run-isotherms
 
