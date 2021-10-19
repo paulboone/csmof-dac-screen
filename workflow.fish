@@ -147,8 +147,10 @@ end
 function process-voidfraction
   echo "mof, voidfraction, voidfraction_error" > voidfraction.csv
   for mof in */
-    set widomline (string split -n " " (grep "Average Widom Rosenbluth-weight:" results/Output/System_0/*.data))
-    echo "$mof, $widomline[5], $widomline[7]" >> voidfraction.csv
+    set mofname (basename $mof)
+    echo $mofname
+    set widomline (string split -n " " (grep "Average Widom Rosenbluth-weight:" $mofname/results/Output/System_0/*.data))
+    echo "$mofname, $widomline[5], $widomline[7]" >> voidfraction.csv
   end
 end
 
