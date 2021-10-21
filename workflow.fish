@@ -386,8 +386,8 @@ function setup-raspa-isotherm-dirs
 
     # N2 @ 77K for surface area
     for p in $pressures
-      mkdir -p N2-77K-$p
-      cd N2-77K-$p
+      mkdir -p N2@77K-$p
+      cd N2@77K-$p
       cp ../../../$mofpath ./$mof.cif
       cp $CSMOFTMPS/run-adsorption/n2_stp.input ./n2.input
       cp $CSMOFTMPS/run-adsorption/force_field.def ./
@@ -404,16 +404,12 @@ function setup-raspa-isotherm-dirs
 end
 
 function process-isotherm-data
+  mkdir -p isotherms
   for d in uio*/
     set mof (basename $d)
     echo "$mof/*/results/Output/System_0/*.data"
-    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2-*/results/Output/System_0/*.data" > {$mof}_N2.csv
-    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2@77K-*/results/Output/System_0/*.data" > {$mof}_N2@77K.csv
-    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/CO2*/results/Output/System_0/*.data" > {$mof}_CO2.csv
-  end
-  mkdir -p isotherms
-  cd isotherms
-  for x in ../*.csv
-    sim2expisothermcsv $x
+    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2-*/results/Output/System_0/*.data" > ./isotherms/{$mof}_N2_sim.csv
+    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2@77K-*/results/Output/System_0/*.data" > ./isotherms/{$mof}_N2@77K_sim.csv
+    extract-loadings --pa2bar --isothermruns --units cc_g "$mof/CO2*/results/Output/System_0/*.data" > ./isotherms/{$mof}_CO2_sim.csv
   end
 end
