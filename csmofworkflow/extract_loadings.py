@@ -23,9 +23,11 @@ def extract_loadings(glob, units='vv', pa2bar=False, isothermruns=False):
     else:
         pressure_suffix = "Pa"
 
-    loadingcsv.writerow(["mof", "gas", "pressure_%s" % pressure_suffix, "loading_%s" % units, "loading err",
-                        "block1", "block2", "block3", "block4", "block5", "molecules/uc->V/V", "mol/kg->V/V"])
+    loadingcsv.writerow(["mof", "gas", "pressure_%s" % pressure_suffix, "loading_%s" % units,
+        "loading_err", "loading_excess_%s" % units, "loading_excess_err", "block1", "block2",
+        "block3", "block4", "block5", "molecules/uc->V/V", "mol/kg->V/V"])
 
+    rows = []
     for outputpath in Path("./").glob(glob):
         if isothermruns:
             mof = outputpath.parts[0]
@@ -37,4 +39,9 @@ def extract_loadings(glob, units='vv', pa2bar=False, isothermruns=False):
         loading, loading_error = alldata[0:2]
         if pa2bar:
             pressure = float(pressure) / 100000
-        loadingcsv.writerow([mof, gas, pressure, *alldata])
+
+        rows.append([mof, gas, pressure, *alldata])
+
+    rows.sort()
+    for row in rows:
+        loadingcsv.writerow(row)
