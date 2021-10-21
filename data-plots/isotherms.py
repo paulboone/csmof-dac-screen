@@ -32,7 +32,8 @@ def isotherms(csvfileglob, outputpath="isotherms.png"):
     datanames = [path.basename(csv).removesuffix(".csv") for csv in csvpaths]
     fngroups = sorted({k.split("_")[0] for k in datanames})
     legendnames = [d.replace("uio67-", "").replace("_N2@77K_", " ") for d in datanames]
-    legendnames = [d.replace("uio67-", "").replace("_CO2_", " ") for d in legendnames]
+    legendnames = [d.replace("uio67-", "").replace("_CO2_", " CO2 ") for d in legendnames]
+    legendnames = [d.replace("uio67-", "").replace("_N2_", " N2 ") for d in legendnames]
 
     fn2cm = {k:i for i, k in enumerate(fngroups)}
 
