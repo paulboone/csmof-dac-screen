@@ -15,11 +15,14 @@ fsl = fs = 9
 @click.argument('raspasas', type=click.File())
 @click.option('--outputpath', '-o', type=click.Path(), default="surface-area-comparison.png")
 def surface_area_comparison(betsas, raspasas, outputpath="surface-area-comparison.png"):
-    bet_df = pd.read_csv(betsas, skipinitialspace=True)
-    rsa_df = pd.read_csv(raspasas, skipinitialspace=True)
+    bet_df = pd.read_csv(betsas, skipinitialspace=True, comment="#")
+    rsa_df = pd.read_csv(raspasas, skipinitialspace=True, comment="#")
+
+    # only use raspa surface areas that we have BET surface areas for
     rsa_df = rsa_df[rsa_df.mof.isin(bet_df.mof)]
     rsa_df['sim'] = "raspa"
     rsa_df.rename(columns={'surfacearea': 'area'}, inplace=True)
+
     all_df = bet_df.append(rsa_df)
     all_df = all_df.pivot(index="mof", columns="sim", values=["area"])
     all_df.columns = ["_".join(a) for a in all_df.columns.to_flat_index()]
