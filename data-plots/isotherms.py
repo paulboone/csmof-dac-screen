@@ -31,7 +31,7 @@ def isotherms(csvfileglob, outputpath="isotherms.png"):
     alldata = [pd.read_csv(csv) for csv in csvpaths]
     datanames = [path.basename(csv).removesuffix(".csv") for csv in csvpaths]
     fngroups = sorted({k.split("_")[0] for k in datanames})
-    legendnames = [d.replace("uio67-", "").replace("_N2@77K_", " ") for d in datanames]
+    legendnames = [d.replace("uio67-", "").replace("_N2@77K_", " N2@77K ") for d in datanames]
     legendnames = [d.replace("uio67-", "").replace("_CO2_", " CO2 ") for d in legendnames]
     legendnames = [d.replace("uio67-", "").replace("_N2_", " N2 ") for d in legendnames]
 
@@ -45,10 +45,17 @@ def isotherms(csvfileglob, outputpath="isotherms.png"):
         legendname = legendnames[i]
         marker = "$\\backslash\\backslash$" if "-2_" in isoname else "$\\backslash$"
         linestyle = "--" if "_sim" in isoname else "-"
-        ax.plot(isodata.pressure_bar, isodata.loading_cc_g, color=cm(fngcm[legendname.split(" ")[0]]), linestyle=linestyle, label=legendname, marker=marker, zorder=10)
 
-    ax.axvline(0.79, label="atmospheric N2", ls="--", lw=1, color=".1", zorder=5)
-    ax.axvline(0.0004, label="atmospheric CO2", ls="--", lw=1, color=".1", zorder=5)
+        if 'loading_err' in isodata:
+            errbars = isodata.loading_err
+            marker = None
+        else:
+            errbars = None
+            marker = 'o'
+        ax.errorbar(isodata.pressure_bar, isodata.loading_cc_g, errbars, color=cm(fngcm[legendname.split(" ")[0]]), lw=1.0, linestyle=linestyle, label=legendname, zorder=10, capsize=2, marker=marker, ms=2) # capthick=0.5
+
+    ax.axvline(0.79, label="atmospheric N2", ls="--", lw=1.0, color=".1", zorder=5)
+    ax.axvline(0.0004, label="atmospheric CO2", ls="--", lw=1.0, color=".1", zorder=5)
 
     ax.set_xlabel('Pressure (bar)', fontsize=fsl)
     ax.set_ylabel('Adsorption (CC/g)', fontsize=fsl)
