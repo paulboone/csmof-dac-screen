@@ -5,7 +5,7 @@ import sys
 
 import click
 
-from mofun.raspa_output import parse_henrys
+from csmofworkflow.parse_raspa import parse_henrys
 
 @click.command()
 @click.argument('glob')

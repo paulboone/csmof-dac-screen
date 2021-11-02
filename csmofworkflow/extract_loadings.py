@@ -5,7 +5,7 @@ import sys
 
 import click
 
-from mofun.raspa_output import parse_gas_loading
+from csmofworkflow.parse_raspa import parse_gas_loading
 
 @click.command()
 @click.argument('glob')
