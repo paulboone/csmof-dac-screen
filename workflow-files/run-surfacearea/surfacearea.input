@@ -17,7 +17,7 @@ InputFileType                   cif
 RemoveAtomNumberCodeFromLabel   yes
 UnitCells                       2 2 2
 HeliumVoidFraction              1.0
-SurfaceAreaProbeDistance        Sigma
+SurfaceAreaProbeDistance        Minimum
 
 ExternalTemperature             298
 
