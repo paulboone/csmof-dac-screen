@@ -15,8 +15,10 @@ fsl = fs = 9
 
 @click.command()
 @click.argument('csvfileglob', type=str)
+@click.option('--xlim', type=float, default=None)
+@click.option('--ylim', type=float, default=None)
 @click.option('--outputpath', '-o', type=click.Path(), default="isotherms.png")
-def isotherms(csvfileglob, outputpath="isotherms.png"):
+def isotherms(csvfileglob, outputpath="isotherms.png", xlim=None, ylim=None):
     fig = plt.figure(figsize=(7., 7.))
     ax = fig.subplots(ncols=1)
 
@@ -25,6 +27,7 @@ def isotherms(csvfileglob, outputpath="isotherms.png"):
         'uio67':14, 'uio66':15,
         'NH2-2':2, 'NH2': 3,
         'CH3-2':4, 'CH3': 5,
+        'CyNH-2':16, 'CyNH': 17,
     }
 
     csvpaths = sorted(glob(csvfileglob))
@@ -37,8 +40,10 @@ def isotherms(csvfileglob, outputpath="isotherms.png"):
 
     fn2cm = {k:i for i, k in enumerate(fngroups)}
 
-    # ax.set_xlim(0, 0.002) #2./1000)
-    # ax.set_ylim(0, .6)
+    if xlim is not None:
+        ax.set_xlim(0, xlim)
+    if ylim is not None:
+        ax.set_ylim(0, ylim)
 
     for i, isodata in enumerate(alldata):
         isoname = datanames[i]
