@@ -187,7 +187,7 @@ function setup-surfacearea
 
     modify-raspa-input $mofname $mofprocessdir/surfacearea.input ../run-voidfraction/voidfraction.csv
   end
-  cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
+  cp $CSMOFTMPS/run-surfacearea/raspa.slurm ./
   cd ..
   echo "Finished. The dirs in run-surfacearea should be run on H2P using the provided .slurm file."
 end
