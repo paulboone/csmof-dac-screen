@@ -205,7 +205,7 @@ function setup-adsorption
       cp $CSMOFTMPS/run-adsorption/*.def $mofprocessdir/
       cp $raspa_input $mofprocessdir
 
-      modify-raspa-input $mofname $raspa_input ../run-voidfraction/voidfraction.csv
+      modify-raspa-input $mofname $mofprocessdir/$gasprocess.input ../run-voidfraction/voidfraction.csv
     end
   end
   cp $CSMOFTMPS/run-adsorption/raspa.slurm ./
