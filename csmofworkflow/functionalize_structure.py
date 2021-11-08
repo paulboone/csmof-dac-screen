@@ -9,9 +9,12 @@ from mofun.rough_uff import assign_pair_coeffs
 @click.argument('structure_path',  type=click.Path())
 @click.argument('linker_path', type=click.Path())
 @click.argument('fnlinkers', nargs=-1, type=click.Path())
+@click.option('--replace-fraction', type=float, default=1.0)
 @click.option('--expected-num', type=int, default=None)
 @click.option('--output-dir', type=click.Path())
-def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers, expected_num=None, output_dir=Path()):
+def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers, replace_fraction=1.0,
+        expected_num=None,output_dir=Path()):
+
     linker = Atoms.load(Path(linker_path))
     structure = Atoms.load(structure_path)
     output_dir = Path(output_dir)
@@ -21,7 +24,9 @@ def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers,
         print("reading %s" %fnlinker_path)
         fnlinker = Atoms.load(fnlinker_path)
         try:
-            new_structure, num_matches = replace_pattern_in_structure(structure, linker, fnlinker, return_num_matches=True)
+            new_structure, num_matches = replace_pattern_in_structure(structure, linker, fnlinker,
+                replace_fraction=replace_fraction, return_num_matches=True)
+
             if  expected_num is not None and expected_num != num_matches:
                 print("ERROR: # of matches %d does NOT match expected number %d" % (num_matches, expected_num))
             else:
