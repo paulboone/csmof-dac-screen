@@ -30,7 +30,7 @@ def functionalize_structure_with_linkers(structure_path, linker_path, fnlinkers,
             if  expected_num is not None and expected_num != num_matches:
                 print("ERROR: # of matches %d does NOT match expected number %d" % (num_matches, expected_num))
             else:
-                new_structure.save(output_dir / (Path(fnlinker_path).stem + ".lmpdat"))
+                new_structure.save(output_dir / (Path(structure_path).stem + "_" + Path(fnlinker_path).stem + ".lmpdat"))
         except Exception as e:
             print("ERROR! ", e.args)
 
