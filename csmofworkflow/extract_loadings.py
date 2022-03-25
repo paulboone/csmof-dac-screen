@@ -25,7 +25,7 @@ def extract_loadings(glob, units='vv', pa2bar=False, isothermruns=False):
 
     loadingcsv.writerow(["mof", "gas", "pressure_%s" % pressure_suffix, "loading_%s" % units,
         "loading_err", "loading_excess_%s" % units, "loading_excess_err", "block1", "block2",
-        "block3", "block4", "block5", "molecules/uc->V/V", "mol/kg->V/V"])
+        "block3", "block4", "block5", "vv_per_m_uc", "vv_per_molkg", "molkg_per_m_uc", "uc_volume_a3"])
 
     rows = []
     for outputpath in Path("./").glob(glob):

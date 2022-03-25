@@ -214,8 +214,8 @@ function setup-adsorption
 end
 
 function process-adsorption-data
-  extract-loadings "uio*_stp/results/Output/System_0/*.data" > loadings_stp.csv
-  extract-loadings "uio*_desorb/results/Output/System_0/*.data" > loadings_desorb.csv
+  extract-loadings --units m_uc "uio*_stp/results/Output/System_0/*.data" > loadings_stp.csv
+  extract-loadings --units m_uc "uio*_desorb/results/Output/System_0/*.data" > loadings_desorb.csv
 
   extract-henrys "uio*_henrys/results/Output/System_0/*.data" > henrys_stp.csv
   extract-henrys "uio*_henrys2/results/Output/System_0/*.data" > henrys_desorb.csv
@@ -310,7 +310,7 @@ function process-diffusion-data
   _converttrj 3 uio*-n2
   _converttrj 4 uio*-tip4p
 
-  echo "MOF, gas, D (MSD), D(FIT), MSD" > diffusivities.csv
+  echo "mof, gas, d_msd_a2_fs, d_fit_a2_fs, msd" > diffusivities.csv
   for sim in uio*/diffusivity.out
     set -l gasname (string split - (dirname $sim))[-1]
     set -l mofname (basename (dirname $sim) -$gasname)
@@ -400,5 +400,11 @@ function process-isotherm-data
     extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2-*/results/Output/System_0/*.data" > ./isotherms/{$mof}_N2_sim.csv
     extract-loadings --pa2bar --isothermruns --units cc_g "$mof/N2@77K-*/results/Output/System_0/*.data" > ./isotherms/{$mof}_N2@77K_sim.csv
     extract-loadings --pa2bar --isothermruns --units cc_g "$mof/CO2*/results/Output/System_0/*.data" > ./isotherms/{$mof}_CO2_sim.csv
+  end
+end
+
+function rename_bpdc
+  for d in *BPDC*                                                                                                                                                                                                                                                                                                 Fri Mar 25 12:18:35 2022
+    mv $d (string replace BPDC CH3 $d)
   end
 end

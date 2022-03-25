@@ -131,19 +131,69 @@ mof_order = [
     'UIO-67 2x alkane-OC$_5$'
 ]
 
+@click.command()
+@click.argument('loadings_csv', type=click.Path())
+@click.argument('henrys_csv', type=click.Path())
+@click.argument('diff_csv', type=click.Path())
+def create_diff_ads_m_a3(loadings_csv, henrys_csv, diff_csv):
+    # ASSUME STP
+    n2_pa = 79033.50
+    h2o_pa = 2050
+    co2_pa = 42.18
+
+    henrys = pd.read_csv(henrys_csv, usecols=['mof', 'henrys_mol_kg_pa.2', 'molkg_per_m_uc', 'uc_volume_a3'])
+    henrys.rename(columns={'henrys_mol_kg_pa.2':'h2o_mol_kg_pa'}, inplace=True)
+    henrys['a_h2o_m_a3'] = henrys["h2o_mol_kg_pa"] * h2o_pa / (henrys['molkg_per_m_uc'] * henrys['uc_volume_a3'])
+    henrys = henrys.filter(['mof', 'a_h2o_m_a3'])
+    print(henrys)
+
+
+    print(pd.read_csv(loadings_csv))
+    loadings = pd.read_csv(loadings_csv, usecols=['mof', 'gas', 'loading_m_uc', 'uc_volume_a3'])
+    print(loadings)
+    loadings['loading_m_a3'] = loadings['loading_m_uc'] / loadings['uc_volume_a3']
+    loadings.drop("loading_m_uc", axis="columns", inplace=True)
+    print(loadings)
+    loadings = loadings.pivot(index="mof", columns="gas", values=['loading_m_a3'])
+    loadings.columns = ["_".join(a) for a in loadings.columns.to_flat_index()]
+    loadings.rename(columns={'mof_':'mof', "loading_m_a3_co2": "a_co2_m_a3", "loading_m_a3_n2": "a_n2_m_a3"}, inplace=True)
+    print(loadings)
+
+    diffs = pd.read_csv(diff_csv, usecols=["mof", "gas", "d_fit_a2_fs", "msd"], skipinitialspace=True)
+    diffs.loc[diffs["msd"] < 200, 'd_fit_a2_fs'] = 0.
+    diffs.rename(columns={'d_fit_a2_fs': 'd_a2_fs'}, inplace=True)
+    diffs.drop("msd", axis='columns', inplace=True)
+    diffs = diffs.pivot(index="mof", columns="gas", values=["d_a2_fs"])
+    diffs.reset_index(level=0, inplace=True) # convert mof to column
+    diffs.columns = ["_".join(a) for a in diffs.columns.to_flat_index()]
+    diffs.rename(columns={'mof_':'mof',
+        "d_a2_fs_co2": "d_co2_a2_fs",
+        "d_a2_fs_n2": "d_n2_a2_fs",
+        "d_a2_fs_tip4p": "d_h2o_a2_fs"},
+    inplace=True)
+    diffs.replace(np.inf, 1000., inplace=True)
+    diffs.replace(np.nan, 0., inplace=True)
+    # print(diffs)
+
+    data = pd.merge(henrys, loadings, on="mof")
+    data = pd.merge(data, diffs, on="mof")
+
+    data['mof'] = data['mof'].str.replace("uio6", "UIO-6")
+    data['mof'] = data['mof'].map(mof_name_mapping)
+    data.set_index('mof').reindex(mof_order).to_csv("data-all-mofs.csv", float_format='%.2e')
 
 @click.command()
 @click.argument('loadings_csv', type=click.Path())
 @click.argument('henrys_csv', type=click.Path())
 def loadings2selectivities(loadings_csv, henrys_csv):
 
-    n2_pa=79033.50
-    h2o_pa=2050
-    co2_pa= 42.18
+    n2_pa = 79033.50
+    h2o_pa = 2050
+    co2_pa = 42.18
 
     henrys = pd.read_csv(henrys_csv, usecols=['mof', 'henrys_mol_kg_pa.2', 'henrys_err.2', 'mol/kg->V/V'])
     henrys.rename(columns={'henrys_mol_kg_pa.2':'h2o_mol_kg', 'henrys_err.2':'h2o_err_mol_kg'}, inplace=True)
-    henrys["loading_h2o_old"] = henrys["h2o_mol_kg"]*h2o_pa
+    henrys["loading_h2o_old"] = henrys["h2o_mol_kg"] * h2o_pa
     henrys['loading_h2o'] = henrys["h2o_mol_kg"] * henrys["mol/kg->V/V"] * h2o_pa
 
     loadings = pd.read_csv(loadings_csv)
