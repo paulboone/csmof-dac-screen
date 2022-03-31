@@ -6,7 +6,7 @@ import pandas as pd
 score_metric = "cs_score_2"
 score_name = {'cs_score': 'fraction CO2 output stream / 400ppm',
               'cs_score_2': '(fraction CO2 output stream / 400ppm) x CO2 adsorbed',}
-cs = pd.read_csv("scores.csv", usecols=["mof_shell", "mof_core", score_metric])
+cs = pd.read_csv("scores-out.csv", usecols=["mof_shell", "mof_core", score_metric])
 
 
 grid = cs.pivot(index="mof_shell", columns="mof_core", values=score_metric)
@@ -34,5 +34,5 @@ for (y,x), v in np.ndenumerate(grid_np):
 
 # cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
 
-fig.savefig("%s.png" % score_metric, dpi=144)
+fig.savefig("size-normalized-%s.png" % score_metric, dpi=144)
 
