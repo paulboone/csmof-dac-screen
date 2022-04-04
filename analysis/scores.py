@@ -142,10 +142,6 @@ mofs['co2_flux_mole_cm2s'] = mofs['a_co2_mole_cm3'] * mofs['d_co2_cm2_s'] / mofs
 mofs['h2o_breakthrough_adsorption_mol_cm2'] = [find_total_adsorption(*conc_args) for conc_args in
     mofs[['h2o_breakthrough_time_s', 'a_h2o_mole_cm3', 'd_h2o_cm2_s', 'shell_size_cm']].itertuples(index=False)]
 
-
-
-
-
 shells = mofs
 cores = mofs[['mof', 'a_co2_mole_cm3', 'a_n2_mole_cm3']]
 
@@ -161,6 +157,8 @@ cs['cs_co2_mole'] = cs['a_co2_mole_cm3_core'] * cs['core_volume_cm3']
 # cs['cs_co2_mole'] = cs['a_co2_mole_cm3_shell'] * cs['shell_volume_cm3'] + cs['a_co2_mole_cm3_core'] * cs['core_volume_cm3']
 cs['cs_n2_mole'] = cs['a_n2_mole_cm3_shell'] * cs['shell_volume_cm3'] + cs['a_n2_mole_cm3_core'] * cs['core_volume_cm3']
 cs['cs_h2o_mole'] = cs['h2o_breakthrough_adsorption_mol_cm2'] * 4 * math.pi * cs['core_radius_cm'] ** 2 # this will underestimate for smaller spheres
+
+
 cs['cs_co2_fraction'] = cs['cs_co2_mole'] / (cs['cs_co2_mole'] + cs['cs_n2_mole'] + cs['cs_h2o_mole'])
 cs['cs_co2_mole_cm3'] = cs['cs_co2_mole'] / (cs['core_volume_cm3'] + cs['shell_volume_cm3'])
 
@@ -169,13 +167,15 @@ cs['core_adsorption_co2_n2_selectivity'] = (cs['a_co2_mole_cm3_core'] / 42.18) /
 
 
 cs['cs_score'] = cs['cs_co2_fraction'] / (400/1000000)
+cs['cs_score_1a'] = cs['cs_co2_fraction'] / cs[(cs.mof_core == "UIO-67") & (cs.mof_shell == "UIO-67")]['cs_co2_fraction'].values[0]
 cs['cs_score_2'] = (cs['cs_score'] - 1) * cs['cs_co2_mole_cm3']
 cs['cs_score_3'] = cs['cs_score_2']  / cs[(cs.mof_core == "UIO-67") & (cs.mof_shell == "UIO-67")]['cs_score_2'].values[0]
+cs['cs_score_4'] = cs['cs_co2_mole_cm3']  / cs[(cs.mof_core == "UIO-67") & (cs.mof_shell == "UIO-67")]['cs_co2_mole_cm3'].values[0]
 # cs['cs_score_3'] = cs['shell_membrane_co2_h2o_selectivity'] * cs['a_co2_mole_cm3_core']
 # cs['cs_score_4'] = cs['shell_membrane_co2_h2o_selectivity'] * cs['core_adsorption_co2_n2_selectivity']
 # cs['cs_score_3'] = cs['cs_score'] * (1 / ((4/3) * math.pi * (cs['core_size_cm'] + cs['shell_size_cm'])**2)) # this should be mutiplied by pellets per cm3
 
-cs.to_csv("scores-out-spheres-noco2shell-altscores.csv")
+cs.to_csv("scores-out-spheres-noco2shell-altscores-2.csv")
 
 
 print(cs)

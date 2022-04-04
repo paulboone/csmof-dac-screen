@@ -11,9 +11,10 @@ import pandas as pd
 @click.option('--metric', '-m', type=str, default="cs_score_2")
 def plot_scores(inputpath, outputpath, metric="cs_score_2"):
     score_name = {'cs_score': 'CO2 output stream ppm / 400 ppm',
+                  'cs_score_1a': 'fraction CO2 output stream / fraction CO2 output stream UiO-67',
                   'cs_score_2': '[CO2 output stream ppm / 400 ppm - 1] x CO2 adsorbed [mol / cm3]',
-                  'cs_score_3': '[CO2 output stream ppm / 400 ppm - 1] x CO2 adsorbed / [same calc for UIO-67]',
-                  'cs_score_4': 'score 4'}
+                  'cs_score_3': '[CO2 output stream ppm x CO2 adsorbed / [same calc for UIO-67]',
+                  'cs_score_4': 'C-S MOF CO2 adsorbed / C-S UiO-67 adsorbed'}
 
     cs = pd.read_csv(inputpath, usecols=["mof_shell", "mof_core", metric])
     grid = cs.pivot(index="mof_shell", columns="mof_core", values=metric)
@@ -42,7 +43,7 @@ def plot_scores(inputpath, outputpath, metric="cs_score_2"):
     print(label_threshold, label_multiplier)
     for (y,x), v in np.ndenumerate(grid_np):
         if v > label_threshold:
-            text = ax.text(x, y, "%2d" % (label_multiplier * v), ha="center", va="center", color="black")
+            text = ax.text(x, y, "%.2g" % v, ha="center", va="center", color="black")
 
     fig.savefig(outputpath, dpi=144)
 
