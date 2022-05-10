@@ -148,10 +148,11 @@ cores = mofs[['mof', 'a_co2_mole_cm3', 'a_n2_mole_cm3']]
 cs = shells.join(cores, how="cross", lsuffix="_shell", rsuffix="_core")
 
 
+# factor of 3 comes from volume of sphere / surface area of sphere = r/3, so r = 3Jt / ads
 cs['core_radius_cm'] = 3 * cs['co2_flux_mole_cm2s'] * cs['delta_t_s'] / cs['a_co2_mole_cm3_core']
 cs['core_volume_cm3'] = (4.0/3) * math.pi * cs['core_radius_cm']**3
-cs['shell_radius_cm3'] = cs['core_radius_cm'] + cs['shell_size_cm']
-cs['shell_volume_cm3'] = (4.0/3) * math.pi * (cs['shell_radius_cm3'])**3 - cs['core_volume_cm3']
+cs['cs_radius_cm'] = cs['core_radius_cm'] + cs['shell_size_cm']
+cs['shell_volume_cm3'] = (4.0/3) * math.pi * (cs['cs_radius_cm'])**3 - cs['core_volume_cm3']
 
 cs['cs_co2_mole'] = cs['a_co2_mole_cm3_core'] * cs['core_volume_cm3']
 # cs['cs_co2_mole'] = cs['a_co2_mole_cm3_shell'] * cs['shell_volume_cm3'] + cs['a_co2_mole_cm3_core'] * cs['core_volume_cm3']
