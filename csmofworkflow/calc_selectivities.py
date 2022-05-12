@@ -155,14 +155,12 @@ def create_diff_ads_m_a3(loadings_csv, henrys_csv, diff_csv, output_path="data-a
     loadings.rename(columns={'mof_':'mof', "loading_m_a3_co2": "a_co2_m_a3", "loading_m_a3_n2": "a_n2_m_a3"}, inplace=True)
 
     diffs = pd.read_csv(diff_csv, usecols=["mof", "gas", "d_fit_a2_fs", "msd_a2", "d_fit_lower_interval_a2_fs", "d_fit_upper_interval_a2_fs"], skipinitialspace=True)
-    diffs.loc[diffs["msd_a2"] < 200, 'd_fit_a2_fs'] = 0.
     diffs.rename(columns={
             'd_fit_a2_fs': 'd_a2_fs',
             'd_fit_lower_interval_a2_fs': 'd_lower_a2_fs',
             'd_fit_upper_interval_a2_fs': 'd_upper_a2_fs',
         }, inplace=True)
-    diffs.drop("msd_a2", axis='columns', inplace=True)
-    diffs = diffs.pivot(index="mof", columns="gas", values=["d_a2_fs", "d_lower_a2_fs", "d_upper_a2_fs"])
+    diffs = diffs.pivot(index="mof", columns="gas", values=["msd_a2", "d_a2_fs", "d_lower_a2_fs", "d_upper_a2_fs"])
     diffs.reset_index(level=0, inplace=True) # convert mof to column
     diffs.columns = ["_".join(a) for a in diffs.columns.to_flat_index()]
     diffs.rename(columns={'mof_':'mof',
