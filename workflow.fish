@@ -282,7 +282,9 @@ function _converttrj
     end
     if not test -f diffusivity.out
       if test -f ./gastrj.npy
-        npytraj_diffusivity.py ./gastrj.npy --average-rows 1 --fs-per-row 1000 --output-molecule-plots > diffusivity.out
+        set -l gasname (string split - $sim)[-1]
+        set -l mofname (basename $sim -$gasname)
+        python3 /Users/pboone/workspace/csmof-dac-screen/analysis/npytraj_agg.py ./gastrj.npy --mof $mofname --gas $gasname --average-rows 1 --fs-per-row 1000 > diffusivity.out
       else
         echo $sim: NO ./gastrj.npy
       end
@@ -302,24 +304,19 @@ function _cleantrj
   rm */diffusivity.out
   rm */nvt-eq.tsv
   rm */nvt.tsv
+  rm */*.png
+  rm */*.npy
 end
 
 function process-diffusion-data
-  echo "NVEeq-1, NVEeq-2, NVEeq-3, NVEeq-4, NVEeq-5, NVT-1, NVT-2, NVT-3, NVT-4, NVT-5" > temps.csv
   _converttrj 3 uio*-co2
   _converttrj 3 uio*-n2
   _converttrj 4 uio*-tip4p
 
-  echo "mof, gas, d_msd_a2_fs, d_fit_a2_fs, msd" > diffusivities.csv
-  for sim in uio*/diffusivity.out
-    set -l gasname (string split - (dirname $sim))[-1]
-    set -l mofname (basename (dirname $sim) -$gasname)
-    set -l dmsd (awk '/^D \(MSD \/ t\) = .* angstrom\^2 \/ fs/ { print $6 }' $sim)
-    set -l dfit (awk '/^D \(fit\) = .* angstrom\^2 \/ fs/ { print $4 }' $sim)
-    set -l msd (awk '/^MSD = .* angstrom\^2/ { print $3 }' $sim)
-    echo $mofname, $gasname, $diffusivity, $dmsd, $dfit, $msd >> diffusivities.csv
-  end
 
+  python3 /Users/pboone/workspace/csmof-dac-screen/csmofworkflow/diff_yaml2csv.py "*/*.yaml" --output-path=diffusivities.csv
+
+  echo "NVEeq-1, NVEeq-2, NVEeq-3, NVEeq-4, NVEeq-5, NVT-1, NVT-2, NVT-3, NVT-4, NVT-5" > temps.csv
   for sim in uio*
     cd $sim
     echo $sim
