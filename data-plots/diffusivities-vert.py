@@ -24,7 +24,7 @@ def diffusivities(csv_path, outputpath="diffusivities.png"):
 
     ax = fig.subplots(ncols=1)
 
-    break_indices = [0, 6, 12, 18, 24] + list(np.array([0, 6, 12, 18, 24]) + 28)
+    break_indices = [0, 6, 12, 18, 24] + list(np.array([0, 6, 12, 18, 24]) + 30)
     adjusted_break_indices = [x + i for i, x in enumerate(break_indices)]
 
     # mof labels go from bottom to top
@@ -37,19 +37,19 @@ def diffusivities(csv_path, outputpath="diffusivities.png"):
     y_indices.reverse()
 
     uio66y = np.array(y_indices[0:28])
-    uio67y = np.array(y_indices[28:56])
+    uio67y = np.array(y_indices[28:58])
 
     ax.set_ylim(0, len(moflabels))
     ax.set_xlim(-7, -2)
 
-    sc1 = ax.plot(np.log10(uio66.CO2), uio66y, color="orange", zorder=20, markersize=3, marker="v", label="UIO-66 CO$_2$", linestyle='None')
-    sc1 = ax.plot(np.log10(uio67.CO2), uio67y, color="orange", zorder=20, markersize=5, marker=r'$\bowtie$', label="UIO-67 CO$_2$", linestyle='None')
+    sc1 = ax.plot(np.log10(uio66.d_co2_a2_fs), uio66y, color="orange", zorder=20, markersize=3, marker="v", label="UIO-66 CO$_2$", linestyle='None')
+    sc1 = ax.plot(np.log10(uio67.d_co2_a2_fs), uio67y, color="orange", zorder=20, markersize=5, marker=r'$\bowtie$', label="UIO-67 CO$_2$", linestyle='None')
 
-    sc1 = ax.plot(np.log10(uio66.N2),  uio66y, color="grey", zorder=20, markersize=3, marker="v", label="UIO-66 N$_2$", linestyle='None')
-    sc1 = ax.plot(np.log10(uio67.N2),  uio67y, color="grey", zorder=20, markersize=5, marker= r'$\bowtie$', label="UIO-67 N$_2$", linestyle='None')
+    sc1 = ax.plot(np.log10(uio66.d_n2_a2_fs),  uio66y, color="grey", zorder=20, markersize=3, marker="v", label="UIO-66 N$_2$", linestyle='None')
+    sc1 = ax.plot(np.log10(uio67.d_n2_a2_fs),  uio67y, color="grey", zorder=20, markersize=5, marker= r'$\bowtie$', label="UIO-67 N$_2$", linestyle='None')
 
-    sc1 = ax.plot(np.log10(uio66.H2O), uio66y, color="blue", zorder=20, markersize=3, marker="v", label="UIO-66 H$_2$O", linestyle='None')
-    sc1 = ax.plot(np.log10(uio67.H2O), uio67y, color="blue", zorder=20, markersize=5, marker= r'$\bowtie$', label="UIO-67 H$_2$O", linestyle='None')
+    sc1 = ax.plot(np.log10(uio66.d_h2o_a2_fs), uio66y, color="blue", zorder=20, markersize=3, marker="v", label="UIO-66 H$_2$O", linestyle='None')
+    sc1 = ax.plot(np.log10(uio67.d_h2o_a2_fs), uio67y, color="blue", zorder=20, markersize=5, marker= r'$\bowtie$', label="UIO-67 H$_2$O", linestyle='None')
 
     ax.set_yticks(adjusted_break_indices)
     ax.set_yticklabels(["" for _ in adjusted_break_indices])
@@ -62,7 +62,7 @@ def diffusivities(csv_path, outputpath="diffusivities.png"):
     ax.grid(which='major', axis='y', linestyle='-', color='0.6', zorder=5)
     ax.grid(which='minor', axis='y', linestyle='--', color='0.9', zorder=0)
 
-    ax.axhline(33, lw=0.75, color='black', zorder=30)
+    ax.axhline(35, lw=0.75, color='black', zorder=30)
 
     ax.legend()
     fig.savefig(outputpath, dpi=300, bbox_inches='tight')
