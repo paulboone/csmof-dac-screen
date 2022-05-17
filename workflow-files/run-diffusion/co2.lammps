@@ -79,3 +79,5 @@ thermo_modify flush yes
 fix d_int_rigid gas rigid/nvt/small molecule temp ${simTemp} ${simTemp} $(v_dt * 100)
 restart       10000000 nvt.*.restart
 run           10000000
+
+# 10M fs = 10ns

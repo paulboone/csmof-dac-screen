@@ -143,7 +143,7 @@ mofs['h2o_breakthrough_adsorption_mol_cm2'] = [find_total_adsorption(*conc_args)
     mofs[['h2o_breakthrough_time_s', 'a_h2o_mole_cm3', 'd_h2o_cm2_s', 'shell_size_cm']].itertuples(index=False)]
 
 shells = mofs
-cores = mofs[['mof', 'a_co2_mole_cm3', 'a_n2_mole_cm3']]
+cores = mofs[['mof', 'a_co2_mole_cm3', 'a_n2_mole_cm3', 'd_co2_cm2_s']]
 
 cs = shells.join(cores, how="cross", lsuffix="_shell", rsuffix="_core")
 
@@ -163,9 +163,11 @@ cs['cs_h2o_mole'] = cs['h2o_breakthrough_adsorption_mol_cm2'] * 4 * math.pi * cs
 cs['cs_co2_fraction'] = cs['cs_co2_mole'] / (cs['cs_co2_mole'] + cs['cs_n2_mole'] + cs['cs_h2o_mole'])
 cs['cs_co2_mole_cm3'] = cs['cs_co2_mole'] / (cs['core_volume_cm3'] + cs['shell_volume_cm3'])
 
-cs['shell_membrane_co2_h2o_selectivity'] = cs['a_co2_mole_cm3_shell'] * cs['d_co2_cm2_s'] / (cs['a_h2o_mole_cm3'] * cs['d_h2o_cm2_s'])
+cs['shell_membrane_co2_h2o_selectivity'] = cs['a_co2_mole_cm3_shell'] * cs['d_co2_cm2_s_shell'] / (cs['a_h2o_mole_cm3'] * cs['d_h2o_cm2_s'])
 cs['core_adsorption_co2_n2_selectivity'] = (cs['a_co2_mole_cm3_core'] / 42.18) / (cs['a_n2_mole_cm3_core'] / 79033.50)
 
+# flag fails diffusion test if the diffusion of co2 in the core is an order of magnitude less than the shell
+cs['fails_diffusion_test'] = cs['d_co2_cm2_s_core'] < cs['d_co2_cm2_s_shell'] / 10
 
 cs['cs_score'] = cs['cs_co2_fraction'] / (400/1000000)
 cs['cs_score_1a'] = cs['cs_co2_fraction'] / cs[(cs.mof_core == "UIO-67") & (cs.mof_shell == "UIO-67")]['cs_co2_fraction'].values[0]
