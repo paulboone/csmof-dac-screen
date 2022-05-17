@@ -221,30 +221,44 @@ function process-adsorption-data
   extract-henrys "uio*_henrys2/results/Output/System_0/*.data" > henrys_desorb.csv
 end
 
+
 function setup-diffusion
-  mkdir -p run-diffusion
-  cd run-diffusion
+  set num_replicates 1
+  set -q $argv[1] || set num_replicates $argv[1]
+  set -l mofs $argv[2..-1] # ../mofs-relaxed-cifs-w-charges/*.cif
+  echo mofs $mofs
+
+  mkdir -p run-diffusion-x
+  cd run-diffusion-x
+
   # make independent configs
-  for mof in ../mofs-relaxed-cifs-w-charges/*.cif
+  for mof in $mofs
+    set mofpath (realpath ../$mof)
     set mofname (basename $mof .cif)
+    echo mofpath $mofpath
 
     for gas in $CSMOFTMPS/run-diffusion/*.lammps
       set gasname (basename $gas .lammps)
       set mofgasdir $mofname-$gasname
       mkdir $mofgasdir
+      cd $mofgasdir
+      for i in (seq 1 $num_replicates)
+        mkdir $i
+        cd $i
 
-      cd $mofgasdir/
-      mofun_converter --mic 12.8 --pp ../$mof $mofname.lmpdat
-      mofun_converter $mofname.lmpdat $mofname.xyz
-      packmol_gaslmpdat -n 10 {$mofname}.lmpdat {$mofname}.xyz $CSMOFTMPS/run-diffusion/$gasname.lmpdat $CSMOFTMPS/run-diffusion/$gasname.xyz
-      cp $gas ./
+        mofun_converter --mic 12.8 --pp $mofpath $mofname.lmpdat
+        mofun_converter $mofname.lmpdat $mofname.xyz
+        packmol_gaslmpdat -n 10 {$mofname}.lmpdat {$mofname}.xyz $CSMOFTMPS/run-diffusion/$gasname.lmpdat $CSMOFTMPS/run-diffusion/$gasname.xyz
+        cp $gas ./
 
-      set randomseed (random)
-      gsed -i "s/variable randomSeed equal.*/variable randomSeed equal $randomseed/g" $gas
+        set randomseed (random)
+        gsed -i "s/variable randomSeed equal.*/variable randomSeed equal $randomseed/g" ./(basename $gas)
 
-      set numatomtypes (grep ".* atom types" $mofname.lmpdat | cut -f 1 -d ' ')
-      gsed -i "s/variable mofAtomTypes equal.*/variable mofAtomTypes equal $numatomtypes/g" $gas
+        set numatomtypes (grep ".* atom types" $mofname.lmpdat | cut -f 1 -d ' ')
+        gsed -i "s/variable mofAtomTypes equal.*/variable mofAtomTypes equal $numatomtypes/g" ./(basename $gas)
 
+        cd ..
+      end
       cd ..
     end
   end
@@ -272,34 +286,43 @@ function _converttrj
   echo $mofs
   for sim in $mofs
     cd $sim
-    echo $sim
-    if not test -f gastrj.npy
-      if test -f ./output/gas.lammpstrj.gz
-        lammpstrj_to_npy.py ./output/gas.lammpstrj.gz -f gastrj.npy --atoms-per-molecule $atoms_per_molecule --start-molecule-index 2
-      else
-        echo $sim: NO ./output/gas.lammpstrj.gz
+    for idx in (string match -r "\d+" *)
+      cd $idx
+      echo $sim: $idx
+      if not test -f gastrj.npy
+        if test -f ./output/gas.lammpstrj.gz
+           lammpstrj_to_npy.py ./output/gas.lammpstrj.gz -f gastrj.npy --atoms-per-molecule $atoms_per_molecule --start-molecule-index 2
+        else
+          echo $sim: NO ./output/gas.lammpstrj.gz
+        end
       end
+      if not test -f nvt-eq.tsv
+        lmp_log_to_tsv.py ./output/lammps.log -i 3 > nvt-eq.tsv
+      end
+      if not test -f nvt.tsv
+        lmp_log_to_tsv.py ./output/lammps.log -i 4 > nvt.tsv
+      end
+      cd ..
+    end
+    if not test -f gastrj.npy
+      python3 /Users/pboone/workspace/csmof-dac-screen/csmofworkflow/npyconcat.py */gastrj.npy --output-path ./gastrj.npy
     end
     if not test -f diffusivity.out
-      if test -f ./gastrj.npy
-        set -l gasname (string split - $sim)[-1]
-        set -l mofname (basename $sim -$gasname)
-        python3 /Users/pboone/workspace/csmof-dac-screen/analysis/npytraj_agg.py ./gastrj.npy --mof $mofname --gas $gasname --average-rows 1 --fs-per-row 1000 > diffusivity.out
-      else
-        echo $sim: NO ./gastrj.npy
+        if test -f ./gastrj.npy
+          set -l gasname (string split - $sim)[-1]
+          set -l mofname (basename $sim -$gasname)
+          python3 /Users/pboone/workspace/csmof-dac-screen/analysis/npytraj_agg.py ./gastrj.npy --mof $mofname --gas $gasname --average-rows 1 --fs-per-row 1000 > diffusivity.out
+        else
+          echo $sim: NO ./gastrj.npy
+        end
       end
-    end
-    if not test -f nvt-eq.tsv
-      lmp_log_to_tsv.py ./output/lammps.log -i 3 > nvt-eq.tsv
-    end
-    if not test -f nvt.tsv
-      lmp_log_to_tsv.py ./output/lammps.log -i 4 > nvt.tsv
-    end
+
     cd ..
   end
 end
 
 function _cleantrj
+  rm */*/gastrj.npy
   rm */gastrj.npy
   rm */diffusivity.out
   rm */nvt-eq.tsv
@@ -313,14 +336,17 @@ function process-diffusion-data
   _converttrj 3 uio*-n2
   _converttrj 4 uio*-tip4p
 
-
   python3 /Users/pboone/workspace/csmof-dac-screen/csmofworkflow/diff_yaml2csv.py "*/*.yaml" --output-path=diffusivities.csv
 
   echo "NVEeq-1, NVEeq-2, NVEeq-3, NVEeq-4, NVEeq-5, NVT-1, NVT-2, NVT-3, NVT-4, NVT-5" > temps.csv
   for sim in uio*
     cd $sim
     echo $sim
-    average-temps -r $sim >> ../temps.csv
+    for idx in (string match -r "\d+" *)
+      cd $idx
+      average-temps -r $sim-$idx >> ../../temps.csv
+      cd ..
+    end
     cd ..
   end
 end
