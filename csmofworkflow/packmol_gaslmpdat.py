@@ -138,7 +138,7 @@ def packmol_gaslmpdat(structure_lmpdat, structure_xyz, gas_lmpdat, gas_xyz, num_
 
     with open("packmol.input", 'w') as f:
         f.write(packmol_input)
-    subprocess.run("/Users/pboone/workspace/_prereqs/packmol/packmol < packmol.input", shell=True, check=True)
+    subprocess.run("packmol < packmol.input", shell=True, check=True)
     gas_data = np.array(extract_gas_atoms_from_packmol_xyz(output_gas_xyz))
 
     # update the dummy positions in the template gas lmpdat file with real positions from packmol
