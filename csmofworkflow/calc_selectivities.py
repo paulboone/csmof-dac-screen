@@ -30,6 +30,8 @@ mof_name_mapping = {
     "UIO-66-NC4-2":           'UIO-66 2x NC$_4$',
     "UIO-66-NH2":             'UIO-66 NH$_2$',
     "UIO-66-NH2-2":           'UIO-66 2x NH$_2$',
+    "UIO-66-NH2-10x":         'UIO-66 NH$_2$ 10x',
+    "UIO-66-NH2-2-10x":       'UIO-66 2x NH$_2$ 10x',
     "UIO-66-OC3-alkane":      'UIO-66 alkane-OC$_3$',
     "UIO-66-OC3-alkane-2":    'UIO-66 2x alkane-OC$_3$',
     "UIO-66-OC4-alkane":      'UIO-66 alkane-OC$_4$',
@@ -58,6 +60,8 @@ mof_name_mapping = {
     "UIO-67-NC4-2":           'UIO-67 2x NC$_4$',
     "UIO-67-NH2":             'UIO-67 NH$_2$',
     "UIO-67-NH2-2":           'UIO-67 2x NH$_2$',
+    "UIO-67-NH2-10x":         'UIO-67 NH$_2$ 10x',
+    "UIO-67-NH2-2-10x":       'UIO-67 2x NH$_2$ 10x',
     "UIO-67-CH3":             'UIO-67 CH$_3$',
     "UIO-67-CH3-2":           'UIO-67 2x CH$_3$',
     "UIO-67-OC3-alkane":      'UIO-67 alkane-OC$_3$',
@@ -108,7 +112,9 @@ mof_order = [
     'UIO-67 N$_3$',
     'UIO-67 2x N$_3$',
     'UIO-67 NH$_2$',
+    'UIO-67 NH$_2$ 10x',
     'UIO-67 2x NH$_2$',
+    'UIO-67 2x NH$_2$ 10x',
     'UIO-67 CH$_3$',
     'UIO-67 2x CH$_3$',
     'UIO-67 alkane-HNC$_3$',
@@ -171,7 +177,6 @@ def create_diff_ads_m_a3(loadings_csv, henrys_csv, diff_csv, output_path="data-a
     inplace=True)
     diffs.replace(np.inf, 1000., inplace=True)
     diffs.replace(np.nan, 0., inplace=True)
-    # print(diffs)
 
     data = pd.merge(henrys, loadings, on="mof")
     data = pd.merge(data, diffs, on="mof")

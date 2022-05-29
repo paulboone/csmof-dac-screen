@@ -54,7 +54,7 @@ def diffusivities(csv_path, outputpath="diffusivities.png"):
     y_indices.reverse()
 
     uio66y = np.array(y_indices[0:28])
-    uio67y = np.array(y_indices[28:58])
+    uio67y = np.array(y_indices[28:60])
 
     ax.set_ylim(0, len(moflabels))
     ax.set_xlim(-7, -2)
