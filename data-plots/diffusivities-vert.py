@@ -23,9 +23,11 @@ def diffusivities(csv_path, outputpath="diffusivities.png"):
     data.d_lower_h2o_a2_fs.clip(lower=0, inplace=True)
 
     logd_min = -7
-    data['d_co2'] = np.log10(data.d_co2_a2_fs).clip(lower=logd_min + 0.1)
-    data['d_n2'] = np.log10(data.d_n2_a2_fs).clip(lower=logd_min + 0.1)
-    data['d_h2o'] = np.log10(data.d_h2o_a2_fs).clip(lower=logd_min + 0.1)
+    d_min = 1.2e-7
+    data['d_co2'] = np.log10(data.d_co2_a2_fs.clip(lower=d_min))
+    data['d_n2'] = np.log10(data.d_n2_a2_fs.clip(lower=d_min))
+    data['d_h2o'] = np.log10(data.d_h2o_a2_fs.clip(lower=d_min))
+
 
     data['d_co2_deltl'] = data.d_co2 - np.log10(data.d_lower_co2_a2_fs).clip(lower=logd_min)
     data['d_co2_deltu'] = np.log10(data.d_upper_co2_a2_fs) - data.d_co2
