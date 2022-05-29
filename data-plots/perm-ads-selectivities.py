@@ -23,9 +23,9 @@ def perm_ads_selectivity(csv_path, outputpath="perm-ads-selectivity.png", plotnu
 
     def anno(idx, x, y, alignment='left', xytextoffset=(0,0), fontsize=fsl):
         if alignment=='left':
-            xytext = (4, -1.0)
+            xytext = (4, -0.0)
         else:
-            xytext = (-4, -0.5)
+            xytext = (-3, -0.0)
         ax.annotate(data.mof[idx], (x, y), size=5,
             xytext=(xytext[0] + xytextoffset[0], xytext[1] + xytextoffset[1]), textcoords='offset points', horizontalalignment=alignment, verticalalignment='center')
 
@@ -59,14 +59,24 @@ def perm_ads_selectivity(csv_path, outputpath="perm-ads-selectivity.png", plotnu
         mof = data.mof[idx]
         # x, y = (data.log_ads_selectivity[idx], data.log_diff_selectivity[idx])
         x, y = (data.log_ads_selectivity[idx], data.log_perm_selectivity[idx])
-        if mof in ["OH",  "CH$_3$", "NH$_2$", "2x NH$_2$", "alkane-HNC$_5$", "alkane-HNC$_4$", "branched-HNC$_5$", "ring-HNC$_5$",
-            "alkane-OC$_3$", "alkane-OC$_5$", "UIO-67"]:
+        if mof == "UIO-67":
+            anno(idx, x, y, 'left', xytextoffset=(-1,-3.5))
+        elif mof == "2x OH":
+            anno(idx, x, y, 'right', xytextoffset=(6,4.2))
+        elif mof == "ring-HNC$_5$":
+            anno(idx, x, y, 'left', xytextoffset=(-2,-4))
+        elif mof == "2x alkane-OC$_4$":
+            anno(idx, x, y, 'right', xytextoffset=(1,-3))
+        elif mof == "alkane-OC$_4$":
+            anno(idx, x, y, 'right', xytextoffset=(0.5,2.5))
+        elif mof in ["OH",  "CH$_3$", "NH$_2$", "2x NH$_2$", "alkane-HNC$_5$", "branched-HNC$_5$",
+            "alkane-OC$_5$", "UIO-67", "alkane-HNC$_3$"]:
             anno(idx, x, y, 'left')
-        else:
+        else: # "alkane-HNC$_4$", "alkane-OC$_3$"
             anno(idx, x,y, 'right')
 
 
-    ax.legend()
+    # ax.legend()
     # fig.subplots_adjust(wspace=0.05, hspace=0.05)
     fig.savefig(outputpath, dpi=300, bbox_inches='tight') # , transparent=True
     plt.close(fig)
