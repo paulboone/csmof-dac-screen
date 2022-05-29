@@ -30,6 +30,8 @@ def highest_cs_score_table(inputpath, metric="cs_score_1a"):
     cs['core_only_score'] = core_only_score
     cs['shell_only_score'] = shell_only_score
     cs['improved_score'] = cs[metric] / cs[["core_only_score", "shell_only_score"]].max(axis=1)
+
+    cs.loc[cs[metric] <= 0, 'improved_score'] = 0
     # cs = cs[(cs[core_only_score] > 0.0) & (cs[shell_only_score] > 0.0) ]
     cs.sort_values(by='improved_score', ascending=False, inplace=True)
 
