@@ -30,8 +30,6 @@ mof_name_mapping = {
     "UIO-66-NC4-2":           'UIO-66 2x NC$_4$',
     "UIO-66-NH2":             'UIO-66 NH$_2$',
     "UIO-66-NH2-2":           'UIO-66 2x NH$_2$',
-    "UIO-66-NH2-10x":         'UIO-66 NH$_2$ 10x',
-    "UIO-66-NH2-2-10x":       'UIO-66 2x NH$_2$ 10x',
     "UIO-66-OC3-alkane":      'UIO-66 alkane-OC$_3$',
     "UIO-66-OC3-alkane-2":    'UIO-66 2x alkane-OC$_3$',
     "UIO-66-OC4-alkane":      'UIO-66 alkane-OC$_4$',
@@ -60,8 +58,6 @@ mof_name_mapping = {
     "UIO-67-NC4-2":           'UIO-67 2x NC$_4$',
     "UIO-67-NH2":             'UIO-67 NH$_2$',
     "UIO-67-NH2-2":           'UIO-67 2x NH$_2$',
-    "UIO-67-NH2-10x":         'UIO-67 NH$_2$ 10x',
-    "UIO-67-NH2-2-10x":       'UIO-67 2x NH$_2$ 10x',
     "UIO-67-CH3":             'UIO-67 CH$_3$',
     "UIO-67-CH3-2":           'UIO-67 2x CH$_3$',
     "UIO-67-OC3-alkane":      'UIO-67 alkane-OC$_3$',
@@ -112,9 +108,7 @@ mof_order = [
     'UIO-67 N$_3$',
     'UIO-67 2x N$_3$',
     'UIO-67 NH$_2$',
-    'UIO-67 NH$_2$ 10x',
     'UIO-67 2x NH$_2$',
-    'UIO-67 2x NH$_2$ 10x',
     'UIO-67 CH$_3$',
     'UIO-67 2x CH$_3$',
     'UIO-67 alkane-HNC$_3$',
@@ -148,17 +142,23 @@ def create_diff_ads_m_a3(loadings_csv, henrys_csv, diff_csv, output_path="data-a
     h2o_pa = 2050
     co2_pa = 42.18
 
-    henrys = pd.read_csv(henrys_csv, usecols=['mof', 'henrys_mol_kg_pa.2', 'molkg_per_m_uc', 'uc_volume_a3'])
+    henrys = pd.read_csv(henrys_csv, usecols=['mof', 'henrys_mol_kg_pa.2', 'henrys_err.2', 'molkg_per_m_uc', 'uc_volume_a3', 'vv_per_molkg'])
     henrys.rename(columns={'henrys_mol_kg_pa.2':'h2o_mol_kg_pa'}, inplace=True)
     henrys['a_h2o_m_a3'] = henrys["h2o_mol_kg_pa"] * h2o_pa / (henrys['molkg_per_m_uc'] * henrys['uc_volume_a3'])
-    henrys = henrys.filter(['mof', 'a_h2o_m_a3'])
+    henrys['a_h2o_vv'] = henrys["h2o_mol_kg_pa"] * h2o_pa * henrys['vv_per_molkg']
+    henrys['a_h2o_err_vv'] = henrys["henrys_err.2"] * h2o_pa * henrys['vv_per_molkg']
+    henrys = henrys.filter(['mof', 'a_h2o_m_a3', 'a_h2o_vv', 'a_h2o_err_vv'])
 
-    loadings = pd.read_csv(loadings_csv, usecols=['mof', 'gas', 'loading_m_uc', 'uc_volume_a3'])
+    loadings = pd.read_csv(loadings_csv, usecols=['mof', 'gas', 'loading_m_uc', 'uc_volume_a3', 'vv_per_m_uc', 'loading_err'])
     loadings['loading_m_a3'] = loadings['loading_m_uc'] / loadings['uc_volume_a3']
+    loadings['loading_vv'] = loadings['loading_m_uc'] * loadings['vv_per_m_uc']
+    loadings['loading_err_vv'] = loadings['loading_err'] * loadings['vv_per_m_uc']
     loadings.drop("loading_m_uc", axis="columns", inplace=True)
-    loadings = loadings.pivot(index="mof", columns="gas", values=['loading_m_a3'])
+    loadings = loadings.pivot(index="mof", columns="gas", values=['loading_m_a3', 'loading_vv', 'loading_err_vv'])
     loadings.columns = ["_".join(a) for a in loadings.columns.to_flat_index()]
-    loadings.rename(columns={'mof_':'mof', "loading_m_a3_co2": "a_co2_m_a3", "loading_m_a3_n2": "a_n2_m_a3"}, inplace=True)
+    loadings.rename(columns={'mof_':'mof', "loading_m_a3_co2": "a_co2_m_a3", "loading_m_a3_n2": "a_n2_m_a3",
+        "loading_vv_co2": "a_co2_vv", "loading_vv_n2": "a_n2_vv",
+        "loading_err_vv_co2": "a_co2_err_vv", "loading_err_vv_n2": "a_n2_err_vv"}, inplace=True)
 
     diffs = pd.read_csv(diff_csv, usecols=["mof", "gas", "d_fit_a2_fs", "msd_a2", "d_fit_lower_interval_a2_fs", "d_fit_upper_interval_a2_fs"], skipinitialspace=True)
     diffs.rename(columns={
@@ -178,8 +178,8 @@ def create_diff_ads_m_a3(loadings_csv, henrys_csv, diff_csv, output_path="data-a
     diffs.replace(np.inf, 1000., inplace=True)
     diffs.replace(np.nan, 0., inplace=True)
 
-    data = pd.merge(henrys, loadings, on="mof")
-    data = pd.merge(data, diffs, on="mof")
+    data = pd.merge(henrys, loadings, on="mof", how="outer")
+    data = pd.merge(data, diffs, on="mof", how="outer")
 
     data['mof'] = data['mof'].str.replace("uio6", "UIO-6")
     data['mof'] = data['mof'].map(mof_name_mapping)
